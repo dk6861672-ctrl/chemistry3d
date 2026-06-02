@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemistry 3D Molecule Viewer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#070b1a;font-family:'Segoe UI',system-ui,sans-serif;color:#e8eaf6;min-height:100vh;overflow-x:hidden;}
+
+/* ===== RAIN CANVAS ===== */
+#rainCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+
+/* ===== RAIN CONTROLS — top right, collapsible ===== */
+#rainPanel{position:fixed;top:12px;right:12px;z-index:9000;}
+#rainToggleBtn{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(8,14,35,0.92);border:1px solid #1e2d55;border-radius:10px;
+  padding:7px 12px;cursor:pointer;font-size:11px;color:#7aaaf5;
+  backdrop-filter:blur(8px);transition:all 0.2s;white-space:nowrap;
+  margin-left:auto;width:fit-content;
+}
+#rainToggleBtn:hover{border-color:#3a5aad;color:#a8c8ff;}
+#rainControls{
+  background:rgba(8,14,35,0.95);border:1px solid #1e2d55;border-radius:12px;
+  padding:12px 14px;min-width:210px;backdrop-filter:blur(8px);
+  margin-top:6px;
+  transition:opacity 0.25s,transform 0.25s;
+  transform-origin:top right;
+}
+#rainControls.hidden{display:none;}
+#rainControls .rc-title{font-size:10px;color:#4a6a9a;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.rc-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.rc-label{font-size:11px;color:#5a7ab5;flex:1;}
+.rc-val{font-size:11px;color:#7aaaf5;min-width:32px;text-align:right;}
+input[type=range]{flex:1;height:3px;-webkit-appearance:none;appearance:none;background:#1e2d55;border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:#4a7aff;border-radius:50%;cursor:pointer;}
+.rc-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px;color:#5a7ab5;margin-top:4px;}
+.rc-toggle input[type=checkbox]{accent-color:#4a7aff;width:13px;height:13px;cursor:pointer;}
+.rc-divider{height:1px;background:#1a2540;margin:8px 0;}
+.rc-hide-btn{
+  width:100%;padding:5px;background:transparent;border:1px solid #1a2540;
+  border-radius:8px;color:#3a5a7a;font-size:11px;cursor:pointer;
+  transition:all 0.2s;margin-top:4px;
+}
+.rc-hide-btn:hover{border-color:#3a5aad;color:#7aaaf5;}
+
+/* ===== APP ===== */
+#app{position:relative;z-index:1;padding-bottom:2rem;}
+.header{text-align:center;padding:1.8rem 1rem 0.8rem;background:linear-gradient(180deg,rgba(13,21,48,0.88) 0%,rgba(7,11,26,0) 100%);}
+.header h1{font-size:24px;font-weight:600;letter-spacing:1px;color:#c8d8ff;}
+.header p{font-size:12px;color:#5a7ab5;margin-top:5px;letter-spacing:0.5px;}
+.search-wrap{padding:0.6rem 1rem;}
+.search-wrap input{width:100%;padding:9px 14px;border-radius:10px;border:1px solid #1e2d55;background:rgba(14,22,40,0.88);color:#c8d8ff;font-size:13px;outline:none;transition:border 0.2s;}
+.search-wrap input:focus{border-color:#3a5aad;}
+.search-wrap input::placeholder{color:#3a4a6a;}
+.tabs{display:flex;gap:6px;padding:0.5rem 1rem;flex-wrap:wrap;justify-content:center;}
+.tab{padding:5px 14px;border-radius:20px;border:1px solid #1e2d55;font-size:11px;cursor:pointer;background:rgba(14,22,40,0.85);color:#5a7ab5;transition:all 0.2s;letter-spacing:0.3px;}
+.tab:hover{border-color:#3a5aad;color:#8aaaf5;}
+.tab.active{background:#1a2d6e;color:#8aaaf5;border-color:#3a5aad;}
+.mol-count{text-align:center;font-size:11px;color:#3a4a6a;padding:0.2rem 1rem 0.4rem;letter-spacing:0.5px;}
+.grid-wrap{padding:0 1rem 0.8rem;max-height:270px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1e2d55 transparent;}
+.grid-wrap::-webkit-scrollbar{width:4px;}
+.grid-wrap::-webkit-scrollbar-track{background:transparent;}
+.grid-wrap::-webkit-scrollbar-thumb{background:#1e2d55;border-radius:4px;}
+.mol-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+.mol-card{border:1px solid #1a2540;border-radius:12px;padding:6px;cursor:pointer;transition:all 0.25s;background:rgba(12,18,32,0.88);position:relative;overflow:hidden;}
+.mol-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(58,90,173,0.08),transparent);opacity:0;transition:opacity 0.25s;}
+.mol-card:hover{border-color:#2a4080;transform:translateY(-2px);}
+.mol-card:hover::before{opacity:1;}
+.mol-card.selected{border-color:#4a7aff;background:rgba(15,24,48,0.92);}
+.mol-card.selected::before{opacity:1;}
+.thumb-wrap{width:100%;height:82px;border-radius:8px;background:#050a16;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.thumb-wrap img{position:absolute;inset:0;width:100%;height:100%;border-radius:8px;object-fit:cover;}
+.thumb-placeholder{font-size:22px;opacity:0.2;pointer-events:none;}
+.mol-name{font-size:11px;font-weight:600;margin-top:4px;text-align:center;color:#a8c0f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mol-formula{font-size:10px;color:#3a5a8a;text-align:center;}
+.viewer-wrap{padding:0 1rem 0.5rem;}
+.viewer-box{border:1px solid #1a2540;border-radius:14px;overflow:hidden;position:relative;background:#050a16;}
+#mainCanvas{width:100%;display:block;}
+.viewer-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none;}
+.ctrl-hint{font-size:10px;color:rgba(100,140,220,0.4);letter-spacing:0.3px;}
+.viewer-btns{display:flex;gap:8px;pointer-events:all;}
+.spin-btn,.expand-btn{background:rgba(20,40,100,0.72);border:1px solid rgba(60,100,200,0.4);color:#7aaaf5;border-radius:20px;padding:5px 14px;font-size:11px;cursor:pointer;backdrop-filter:blur(4px);transition:all 0.2s;letter-spacing:0.3px;}
+.spin-btn:hover,.expand-btn:hover{background:rgba(30,60,140,0.85);}
+.zoom-btns{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;pointer-events:all;z-index:5;}
+.zoom-btn{background:rgba(20,40,100,0.75);border:1px solid rgba(60,100,200,0.4);color:#7aaaf5;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;backdrop-filter:blur(4px);transition:all 0.2s;display:flex;align-items:center;justify-content:center;font-weight:700;user-select:none;-webkit-user-select:none;}
+.zoom-btn:hover{background:rgba(30,60,140,0.9);color:#fff;}
+.zoom-btn:active{transform:scale(0.9);}
+.mol-info-box{margin:0 1rem 0.5rem;border:1px solid #1a2540;border-radius:14px;padding:1rem 1.2rem;background:rgba(12,18,32,0.88);}
+.mol-info-top{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.mol-bigname{font-size:18px;font-weight:600;color:#c8d8ff;}
+.mol-bigformula{font-size:13px;color:#4a6aaa;font-weight:400;margin-left:6px;}
+.mol-cat-badge{display:inline-block;font-size:10px;padding:2px 9px;border-radius:8px;background:#0e1e44;color:#4a7aff;border:1px solid #1e3060;margin-left:8px;vertical-align:middle;letter-spacing:0.3px;}
+.mol-desc{font-size:12px;color:#4a6a9a;margin-top:6px;line-height:1.7;}
+.mol-stats{display:flex;gap:16px;margin-top:8px;}
+.mol-stat{font-size:11px;color:#3a5a7a;}
+.mol-stat span{color:#7aaaf5;font-weight:600;}
+.atom-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.atom-pill{display:flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:8px;border:1px solid #1a2a44;background:#0a1220;color:#6a8ab0;}
+.atom-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.no-results{text-align:center;padding:2rem;color:#3a4a6a;font-size:13px;}
+
+@media(max-width:640px){.modal-info{display:none;}}
+@media(max-width:480px){#suggestBox{width:calc(100vw - 24px);}#rainControls{min-width:180px;}}
+</style>
+</head>
+<body>
+
+<canvas id="rainCanvas"></canvas>
+
+<!-- ===== RAIN PANEL top-right ===== -->
+<div id="rainPanel">
+  <button id="rainToggleBtn">🌧 Rain Settings ▾</button>
+  <div id="rainControls" class="hidden">
+    <div class="rc-title">🌧 Rain Controls</div>
+    <div class="rc-row">
+      <span class="rc-label">Speed</span>
+      <input type="range" id="rcSpeed" min="1" max="10" value="5">
+      <span class="rc-val" id="rcSpeedVal">5</span>
+    </div>
+    <div class="rc-row">
+      <span class="rc-label">Drops</span>
+      <input type="range" id="rcCount" min="20" max="300" value="120">
+      <span class="rc-val" id="rcCountVal">120</span>
+    </div>
+    <div class="rc-row">
+      <span class="rc-label">Length</span>
+      <input type="range" id="rcLength" min="5" max="60" value="20">
+      <span class="rc-val" id="rcLengthVal">20</span>
+    </div>
+    <div class="rc-row">
+      <span class="rc-label">Opacity</span>
+      <input type="range" id="rcOpacity" min="10" max="100" value="55">
+      <span class="rc-val" id="rcOpacityVal">55%</span>
+    </div>
+    <label class="rc-toggle">
+      <input type="checkbox" id="rcEnabled" checked>
+      Rain Enabled
+    </label>
+    <div class="rc-divider"></div>
+    <button class="rc-hide-btn" id="rcHideBtn">✕ Close Panel</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <h1>⚗ Chemistry 3D Molecule Viewer</h1>
+    <p>Click molecule to view in 3D &nbsp;|&nbsp; Double-click or tap ⛶ for fullscreen</p>
+  </div>
+  <div class="search-wrap"><input type="text" id="searchInput" placeholder="Search by name, formula or category..."></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="mol-count" id="molCount"></div>
+  <div class="grid-wrap"><div class="mol-grid" id="molGrid"></div></div>
+  <div class="viewer-wrap">
+    <div class="viewer-box">
+      <canvas id="mainCanvas"></canvas>
+      <div class="zoom-btns">
+        <button class="zoom-btn" id="zoomIn" title="Zoom In">+</button>
+        <button class="zoom-btn" id="zoomOut" title="Zoom Out">−</button>
+        <button class="zoom-btn" id="zoomReset" title="Reset" style="font-size:13px;">↺</button>
+      </div>
+      <div class="viewer-overlay">
+        <div class="ctrl-hint">Drag to rotate &nbsp;|&nbsp; Scroll or +/− to zoom</div>
+        <div class="viewer-btns">
+          <button class="spin-btn" id="spinBtn">↻ Auto Spin ON</button>
+          <button class="expand-btn" id="expandBtn">⛶ Fullscreen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mol-info-box" id="molInfo"></div>
+</div>
+
+<!-- FULLSCREEN MODAL -->
+<div id="modal">
+  <div class="modal-header">
+    <div class="modal-title" id="modalTitle"></div>
+    <button class="modal-close" id="modalClose">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="modal-canvas-wrap">
+      <canvas id="modalCanvas"></canvas>
+      <div class="modal-ctrl-hint">Drag to rotate &nbsp;|&nbsp; Scroll to zoom</div>
+      <button class="modal-spin-btn" id="modalSpinBtn">↻ Auto Spin ON</button>
+      <div class="modal-zoom-btns">
+        <button class="modal-zoom-btn" id="mZoomIn">+</button>
+        <button class="modal-zoom-btn" id="mZoomOut">−</button>
+      </div>
+    </div>
+    <div class="modal-info" id="modalInfo"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ===== SECURITY =====
+document.addEventListener('contextmenu',function(e){e.preventDefault();});
+document.addEventListener('dragstart',function(e){e.preventDefault();});
+document.addEventListener('selectstart',function(e){e.preventDefault();});
+document.addEventListener('copy',function(e){e.preventDefault();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='F12'){e.preventDefault();return false;}
+  if(e.ctrlKey&&e.shiftKey&&['I','J','C'].indexOf(e.key.toUpperCase())>=0){e.preventDefault();return false;}
+  if(e.ctrlKey&&e.key.toUpperCase()==='U'){e.preventDefault();return false;}
+});
+
+// ===== RAIN =====
+var rainCfg={enabled:true,speed:5,count:120,length:20,opacity:0.55};
+var rainCanvas=document.getElementById('rainCanvas');
+var rc=rainCanvas.getContext('2d');
+var drops=[];
+function initRain(){
+  rainCanvas.width=window.innerWidth;rainCanvas.height=window.innerHeight;drops=[];
+  for(var i=0;i<rainCfg.count;i++){
+    drops.push({x:Math.random()*rainCanvas.width,y:Math.random()*rainCanvas.height,len:Math.random()*rainCfg.length+8,speed:(Math.random()*3+2)*(rainCfg.speed/5),opacity:Math.random()*0.5+0.2,width:Math.random()*1.2+0.3});
+  }
+}
+function drawRain(){
+  if(!rainCfg.enabled){rc.clearRect(0,0,rainCanvas.width,rainCanvas.height);requestAnimationFrame(drawRain);return;}
+  rc.clearRect(0,0,rainCanvas.width,rainCanvas.height);
+  for(var i=0;i<drops.length;i++){
+    var d=drops[i];
+    rc.beginPath();rc.moveTo(d.x,d.y);rc.lineTo(d.x+d.len*0.15,d.y+d.len);
+    rc.strokeStyle='rgba(100,160,255,'+d.opacity*rainCfg.opacity+')';rc.lineWidth=d.width;rc.stroke();
+    d.y+=d.speed*(rainCfg.speed/5)*1.5;
+    if(d.y>rainCanvas.height+rainCfg.length){d.y=-rainCfg.length;d.x=Math.random()*rainCanvas.width;}
+  }
+  requestAnimationFrame(drawRain);
+}
+initRain();drawRain();
+window.addEventListener('resize',function(){rainCanvas.width=window.innerWidth;rainCanvas.height=window.innerHeight;initRain();});
+
+// Rain controls toggle
+var rainControlsOpen=false;
+document.getElementById('rainToggleBtn').addEventListener('click',function(){
+  rainControlsOpen=!rainControlsOpen;
+  var panel=document.getElementById('rainControls');
+  if(rainControlsOpen){panel.classList.remove('hidden');this.textContent='🌧 Rain Settings ▴';}
+  else{panel.classList.add('hidden');this.textContent='🌧 Rain Settings ▾';}
+});
+document.getElementById('rcHideBtn').addEventListener('click',function(){
+  document.getElementById('rainControls').classList.add('hidden');
+  document.getElementById('rainToggleBtn').textContent='🌧 Rain Settings ▾';
+  rainControlsOpen=false;
+});
+
+function syncRain(){
+  document.getElementById('rcSpeedVal').textContent=rainCfg.speed;
+  document.getElementById('rcCountVal').textContent=rainCfg.count;
+  document.getElementById('rcLengthVal').textContent=rainCfg.length;
+  document.getElementById('rcOpacityVal').textContent=Math.round(rainCfg.opacity*100)+'%';
+}
+document.getElementById('rcSpeed').addEventListener('input',function(){rainCfg.speed=+this.value;syncRain();});
+document.getElementById('rcCount').addEventListener('input',function(){rainCfg.count=+this.value;initRain();syncRain();});
+document.getElementById('rcLength').addEventListener('input',function(){rainCfg.length=+this.value;initRain();syncRain();});
+document.getElementById('rcOpacity').addEventListener('input',function(){rainCfg.opacity=+this.value/100;syncRain();});
+document.getElementById('rcEnabled').addEventListener('change',function(){rainCfg.enabled=this.checked;});
+syncRain();
+
+// ===== ATOM DATA =====
+var AC={H:'#e8e8ff',C:'#4a4a5a',N:'#4488ff',O:'#ff4444',S:'#ffdd00',P:'#ff8800',Cl:'#33dd33',F:'#aaffaa',Na:'#cc55ff',K:'#dd77ff',Ca:'#66ff88',Fe:'#dd7744',Mg:'#33bb33',Zn:'#9999dd',Cu:'#dd5500',Br:'#993311',I:'#8833aa',B:'#ffbbaa',Si:'#bb9966'};
+var AR={H:0.3,C:0.72,N:0.7,O:0.68,S:0.95,P:1.0,Cl:0.92,F:0.6,Na:1.6,K:1.9,Ca:1.7,Fe:1.1,Mg:1.4,Zn:1.1,Cu:1.1,Br:1.05,I:1.2,B:0.78,Si:1.1};
+
+var MOLS=[
+{name:'Water',formula:'H\u2082O',cat:'Basic',desc:'The foundation of all life. Polar molecule with strong hydrogen bonding. Unique surface tension properties.',atoms:[{e:'O',p:[0,0,0]},{e:'H',p:[0.96,0,0]},{e:'H',p:[-0.24,0.93,0]}],bonds:[[0,1],[0,2]]},
+{name:'Ammonia',formula:'NH\u2083',cat:'Basic',desc:'Essential for fertilizers. Pyramidal geometry due to lone pair. Used in refrigeration systems.',atoms:[{e:'N',p:[0,0,0]},{e:'H',p:[1,0,0]},{e:'H',p:[-0.5,0.87,0]},{e:'H',p:[-0.5,-0.87,0]}],bonds:[[0,1],[0,2],[0,3]]},
+{name:'Carbon Dioxide',formula:'CO\u2082',cat:'Basic',desc:'Greenhouse gas and plant food. Perfect linear geometry. Produced in cellular respiration.',atoms:[{e:'C',p:[0,0,0]},{e:'O',p:[1.16,0,0]},{e:'O',p:[-1.16,0,0]}],bonds:[[0,1],[0,2]]},
+{name:'Ozone',formula:'O\u2083',cat:'Basic',desc:'Protects Earth from UV radiation. Bent structure with 117 degree bond angle. Powerful oxidizer.',atoms:[{e:'O',p:[0,0,0]},{e:'O',p:[1.28,0,0]},{e:'O',p:[0.64,-0.9,0]}],bonds:[[0,1],[1,2]]},
+{name:'Hydrogen Peroxide',formula:'H\u2082O\u2082',cat:'Basic',desc:'Antiseptic and bleaching agent. Contains an O-O single bond. Decomposes into water and oxygen.',atoms:[{e:'O',p:[-0.7,0,0]},{e:'O',p:[0.7,0,0]},{e:'H',p:[-1.4,0.8,0]},{e:'H',p:[1.4,0.8,0]}],bonds:[[0,1],[0,2],[1,3]]},
+{name:'HCl',formula:'HCl',cat:'Basic',desc:'Hydrochloric acid. Strong monoprotic acid found naturally in stomach gastric juice.',atoms:[{e:'H',p:[-0.6,0,0]},{e:'Cl',p:[0.7,0,0]}],bonds:[[0,1]]},
+{name:'Methane',formula:'CH\u2084',cat:'Organic',desc:'Simplest hydrocarbon. Perfect tetrahedral geometry. Main component of natural gas.',atoms:[{e:'C',p:[0,0,0]},{e:'H',p:[1,1,1]},{e:'H',p:[-1,-1,1]},{e:'H',p:[-1,1,-1]},{e:'H',p:[1,-1,-1]}],bonds:[[0,1],[0,2],[0,3],[0,4]]},
+{name:'Ethane',formula:'C\u2082H\u2086',cat:'Organic',desc:'Two carbon alkane. Features free rotation around the C-C single bond. Found in natural gas.',atoms:[{e:'C',p:[-0.77,0,0]},{e:'C',p:[0.77,0,0]},{e:'H',p:[-1.3,1,0.6]},{e:'H',p:[-1.3,-1,0.6]},{e:'H',p:[-1.3,0,-1.2]},{e:'H',p:[1.3,1,0.6]},{e:'H',p:[1.3,-1,0.6]},{e:'H',p:[1.3,0,-1.2]}],bonds:[[0,1],[0,2],[0,3],[0,4],[1,5],[1,6],[1,7]]},
+{name:'Ethylene',formula:'C\u2082H\u2084',cat:'Organic',desc:'Plant hormone that triggers fruit ripening. Double bond restricts rotation. Flat planar molecule.',atoms:[{e:'C',p:[-0.67,0,0]},{e:'C',p:[0.67,0,0]},{e:'H',p:[-1.25,0.92,0]},{e:'H',p:[-1.25,-0.92,0]},{e:'H',p:[1.25,0.92,0]},{e:'H',p:[1.25,-0.92,0]}],bonds:[[0,1],[0,2],[0,3],[1,4],[1,5]]},
+{name:'Acetylene',formula:'C\u2082H\u2082',cat:'Organic',desc:'Used in welding torches. Triple bond makes it perfectly linear. Burns at over 3500 degrees C.',atoms:[{e:'C',p:[-0.6,0,0]},{e:'C',p:[0.6,0,0]},{e:'H',p:[-1.66,0,0]},{e:'H',p:[1.66,0,0]}],bonds:[[0,1],[0,2],[1,3]]},
+{name:'Ethanol',formula:'C\u2082H\u2085OH',cat:'Organic',desc:'Beverage alcohol. Hydroxyl group enables hydrogen bonding. Used as fuel and solvent.',atoms:[{e:'C',p:[-1.2,0,0]},{e:'C',p:[1.2,0,0]},{e:'O',p:[2.4,1.0,0]},{e:'H',p:[-1.8,1,0.8]},{e:'H',p:[-1.8,1,-0.8]},{e:'H',p:[-1.8,-1,0]},{e:'H',p:[1.5,1,0.8]},{e:'H',p:[1.5,-1,0.8]},{e:'H',p:[3.2,0.5,0]}],bonds:[[0,1],[1,2],[0,3],[0,4],[0,5],[1,6],[1,7],[2,8]]},
+{name:'Acetic Acid',formula:'CH\u2083COOH',cat:'Organic',desc:'Main component of vinegar. Carboxylic acid with characteristic sour taste. Used in food preservation.',atoms:[{e:'C',p:[-1.2,0,0]},{e:'C',p:[1.2,0,0]},{e:'O',p:[2.4,0.8,0]},{e:'O',p:[2.4,-0.8,0]},{e:'H',p:[-1.8,1,0.7]},{e:'H',p:[-1.8,1,-0.7]},{e:'H',p:[-1.8,-1,0]},{e:'H',p:[3.3,-0.5,0]}],bonds:[[0,1],[1,2],[1,3],[0,4],[0,5],[0,6],[3,7]]},
+{name:'Acetone',formula:'C\u2083H\u2086O',cat:'Organic',desc:'Common nail polish remover. Ketone functional group. Highly flammable and miscible in water.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[-1.5,0,0]},{e:'C',p:[1.5,0,0]},{e:'O',p:[0,1.4,0]},{e:'H',p:[-2.0,1.0,0]},{e:'H',p:[-2.0,-1.0,0]},{e:'H',p:[-1.5,0,-1.0]},{e:'H',p:[2.0,1.0,0]},{e:'H',p:[2.0,-1.0,0]},{e:'H',p:[1.5,0,-1.0]}],bonds:[[0,1],[0,2],[0,3],[1,4],[1,5],[1,6],[2,7],[2,8],[2,9]]},
+{name:'Glucose',formula:'C\u2086H\u2081\u2082O\u2086',cat:'Organic',desc:'Primary energy source for cells. Product of photosynthesis. Exists as a six-membered ring in solution.',atoms:[{e:'C',p:[1.5,0.5,0]},{e:'C',p:[0.8,-0.5,0.8]},{e:'C',p:[-0.7,-0.5,0.8]},{e:'C',p:[-1.5,0.5,0]},{e:'C',p:[-0.7,1.5,0]},{e:'C',p:[0.8,1.5,0]},{e:'O',p:[0,0,0]},{e:'O',p:[2.8,0.5,0]},{e:'O',p:[1.2,-1.5,0.8]},{e:'O',p:[-1.2,-1.5,0.8]},{e:'O',p:[-2.8,0.5,0]},{e:'O',p:[-0.7,2.8,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6],[6,3],[0,7],[1,8],[2,9],[3,10],[4,11]]},
+{name:'Benzene',formula:'C\u2086H\u2086',cat:'Aromatic',desc:'Aromatic ring with delocalized pi electrons. Foundation of aromatic chemistry. Planar hexagonal structure.',atoms:[{e:'C',p:[1.4,0,0]},{e:'C',p:[0.7,1.2,0]},{e:'C',p:[-0.7,1.2,0]},{e:'C',p:[-1.4,0,0]},{e:'C',p:[-0.7,-1.2,0]},{e:'C',p:[0.7,-1.2,0]},{e:'H',p:[2.5,0,0]},{e:'H',p:[1.25,2.15,0]},{e:'H',p:[-1.25,2.15,0]},{e:'H',p:[-2.5,0,0]},{e:'H',p:[-1.25,-2.15,0]},{e:'H',p:[1.25,-2.15,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6],[1,7],[2,8],[3,9],[4,10],[5,11]]},
+{name:'Toluene',formula:'C\u2087H\u2088',cat:'Aromatic',desc:'Benzene with a methyl group. Common industrial solvent and paint thinner.',atoms:[{e:'C',p:[1.4,0,0]},{e:'C',p:[0.7,1.2,0]},{e:'C',p:[-0.7,1.2,0]},{e:'C',p:[-1.4,0,0]},{e:'C',p:[-0.7,-1.2,0]},{e:'C',p:[0.7,-1.2,0]},{e:'C',p:[2.8,0,0]},{e:'H',p:[1.25,2.15,0]},{e:'H',p:[-1.25,2.15,0]},{e:'H',p:[-2.5,0,0]},{e:'H',p:[-1.25,-2.15,0]},{e:'H',p:[1.25,-2.15,0]},{e:'H',p:[3.4,1.0,0]},{e:'H',p:[3.4,-1.0,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6],[1,7],[2,8],[3,9],[4,10],[5,11],[6,12],[6,13]]},
+{name:'Naphthalene',formula:'C\u2081\u2080H\u2088',cat:'Aromatic',desc:'Double fused benzene rings. Found in mothballs. First aromatic compound to be named.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'C',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,2.4,0]},{e:'C',p:[-2.1,3.6,0]},{e:'C',p:[-0.7,3.6,0]},{e:'H',p:[2.5,0,0]},{e:'H',p:[3.2,1.2,0]},{e:'H',p:[2.1,3.4,0]},{e:'H',p:[-3.9,2.4,0]},{e:'H',p:[-2.8,4.5,0]},{e:'H',p:[-0.1,4.5,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[7,8],[8,9],[9,4],[0,10],[2,11],[3,12],[7,13],[8,14],[9,15]]},
+{name:'Aspirin',formula:'C\u2089H\u2088O\u2084',cat:'Medicine',desc:'Most widely used pain reliever. Acetylsalicylic acid. Reduces fever and inflammation. Discovered in 1897.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'C',p:[-2.1,1.2,0]},{e:'O',p:[-2.8,0,0]},{e:'O',p:[-2.8,2.4,0]},{e:'C',p:[-4.2,0,0]},{e:'O',p:[-4.9,1.2,0]},{e:'C',p:[-4.9,-1.2,0]},{e:'O',p:[2.8,2.4,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[6,8],[7,9],[9,10],[9,11],[3,12]]},
+{name:'Caffeine',formula:'C\u2088H\u2081\u2080N\u2084O\u2082',cat:'Medicine',desc:'World\'s most consumed psychoactive drug. Blocks adenosine receptors. Found in coffee, tea, chocolate.',atoms:[{e:'N',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'N',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.3,0]},{e:'N',p:[0,2.3,0]},{e:'C',p:[-0.7,1.2,0]},{e:'N',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,0,0]},{e:'O',p:[-2.1,-1.1,0]},{e:'C',p:[-2.8,2.4,0]},{e:'O',p:[-2.1,3.5,0]},{e:'C',p:[2.8,3.5,0]},{e:'C',p:[3.5,-1.1,0]},{e:'C',p:[-4.2,0,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[7,8],[6,9],[9,10],[3,11],[0,12],[7,13]]},
+{name:'Paracetamol',formula:'C\u2088H\u2089NO\u2082',cat:'Medicine',desc:'Safe and effective painkiller. Sold as Tylenol and Crocin worldwide.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'N',p:[2.1,3.6,0]},{e:'C',p:[3.5,3.6,0]},{e:'O',p:[4.2,4.8,0]},{e:'C',p:[4.2,2.4,0]},{e:'O',p:[-0.7,-1.2,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[3,6],[6,7],[7,8],[7,9],[0,10]]},
+{name:'Ibuprofen',formula:'C\u2081\u2083H\u2081\u2088O\u2082',cat:'Medicine',desc:'Non-steroidal anti-inflammatory (NSAID). Relieves pain, fever and inflammation. Sold as Advil.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'C',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,0,0]},{e:'C',p:[-2.8,2.4,0]},{e:'C',p:[-4.2,0,0]},{e:'C',p:[2.8,3.6,0]},{e:'C',p:[4.2,3.6,0]},{e:'O',p:[4.9,4.8,0]},{e:'O',p:[5.0,2.4,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[6,8],[7,9],[3,10],[10,11],[11,12],[11,13]]},
+{name:'Dopamine',formula:'C\u2088H\u2081\u2081NO\u2082',cat:'Biological',desc:'The "feel-good" neurotransmitter. Controls reward and pleasure. Low levels linked to Parkinson\'s disease.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'O',p:[3.5,1.2,0]},{e:'O',p:[2.1,3.6,0]},{e:'C',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,0,0]},{e:'N',p:[-2.8,-1.4,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[2,6],[3,7],[5,8],[8,9],[9,10]]},
+{name:'Serotonin',formula:'C\u2081\u2080H\u2081\u2082N\u2082O',cat:'Biological',desc:'Mood-regulating neurotransmitter. Target of antidepressant drugs (SSRIs).',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'N',p:[-0.7,-1.2,0]},{e:'C',p:[0.5,-2.2,0]},{e:'C',p:[2,1.2,1.5]},{e:'C',p:[3.5,1.2,1.5]},{e:'N',p:[4.2,0,1.5]},{e:'O',p:[1.4,3.7,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6],[6,7],[2,8],[8,9],[9,10],[3,11]]},
+{name:'Adrenaline',formula:'C\u2089H\u2081\u2083NO\u2083',cat:'Biological',desc:'Fight-or-flight hormone. Released by adrenal glands under stress. Increases heart rate and blood pressure.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'O',p:[3.5,1.2,0]},{e:'O',p:[2.1,3.6,0]},{e:'C',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,0,0]},{e:'N',p:[-2.8,-1.4,0]},{e:'O',p:[-2.8,2.4,0]},{e:'C',p:[-4.2,-1.4,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[2,6],[3,7],[5,8],[8,9],[9,10],[9,11],[10,12]]},
+{name:'Cholesterol',formula:'C\u2082\u2087H\u2084\u2086O',cat:'Biological',desc:'Essential component of cell membranes. Precursor to steroid hormones.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.5,0,0]},{e:'C',p:[2.2,1.3,0]},{e:'C',p:[1.5,2.6,0]},{e:'C',p:[0,2.6,0]},{e:'C',p:[-0.7,1.3,0]},{e:'C',p:[-2.2,1.3,0]},{e:'C',p:[-2.9,2.6,0]},{e:'C',p:[-2.2,3.9,0]},{e:'C',p:[-0.7,3.9,0]},{e:'C',p:[3.7,1.3,0]},{e:'C',p:[4.4,2.6,0]},{e:'C',p:[3.7,3.9,0]},{e:'O',p:[2.2,2.6,0]},{e:'C',p:[5.9,2.6,0]},{e:'C',p:[6.6,3.9,0]},{e:'C',p:[6.6,1.3,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[7,8],[8,9],[9,3],[2,10],[10,11],[11,12],[12,9],[3,13],[11,14],[14,15],[14,16]]},
+{name:'ATP',formula:'C\u2081\u2080H\u2081\u2086N\u2085O\u2081\u2083P\u2083',cat:'Biological',desc:'Adenosine triphosphate: the universal energy currency of all living cells.',atoms:[{e:'N',p:[0,0,0]},{e:'C',p:[1.3,0,0]},{e:'N',p:[2.0,1.1,0]},{e:'C',p:[1.3,2.2,0]},{e:'N',p:[0,2.2,0]},{e:'C',p:[-0.7,1.1,0]},{e:'N',p:[-0.7,3.4,0]},{e:'N',p:[2.0,3.3,0]},{e:'C',p:[0,4.5,0]},{e:'C',p:[1.2,5.5,0]},{e:'C',p:[2.5,4.8,0]},{e:'O',p:[2.8,3.5,0]},{e:'P',p:[3.5,6.5,0]},{e:'P',p:[5.0,7.5,0]},{e:'P',p:[6.5,6.5,0]},{e:'O',p:[4.2,5.5,0]},{e:'O',p:[5.8,5.8,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[3,7],[4,6],[6,8],[8,9],[9,10],[10,11],[11,2],[9,12],[12,13],[13,14],[12,15],[13,16]]},
+{name:'Adenine (DNA)',formula:'C\u2085H\u2085N\u2085',cat:'Biological',desc:'One of four DNA nucleobases. Pairs with Thymine via two hydrogen bonds.',atoms:[{e:'N',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'N',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'N',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'N',p:[-0.7,-1.2,0]},{e:'C',p:[0.5,-2.1,0]},{e:'N',p:[1.9,-2.1,0]},{e:'C',p:[2.8,-1.0,0]},{e:'N',p:[2.1,3.7,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6],[6,7],[7,8],[8,9],[9,1],[3,10]]},
+{name:'Vitamin C',formula:'C\u2086H\u2088O\u2086',cat:'Special',desc:'Ascorbic acid. Powerful antioxidant. Essential for collagen synthesis. Found in citrus fruits.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'O',p:[-0.7,1.2,0]},{e:'O',p:[3.5,1.2,0]},{e:'O',p:[2.1,3.7,0]},{e:'O',p:[1.4,-1.3,0]},{e:'C',p:[2.8,-1.3,0]},{e:'O',p:[3.5,-2.5,0]},{e:'C',p:[2.8,-2.7,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[2,6],[3,7],[1,8],[8,9],[9,10],[10,11]]},
+{name:'Nicotine',formula:'C\u2081\u2080H\u2081\u2084N\u2082',cat:'Special',desc:'Highly addictive alkaloid in tobacco. Stimulates nicotinic acetylcholine receptors.',atoms:[{e:'N',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'C',p:[-2.2,1.2,0]},{e:'N',p:[-2.9,2.5,0]},{e:'C',p:[-4.4,2.5,0]},{e:'C',p:[-4.4,0.8,0]},{e:'C',p:[-2.9,-0.3,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[7,8],[8,9],[9,10],[10,6]]},
+{name:'Sulfuric Acid',formula:'H\u2082SO\u2084',cat:'Inorganic',desc:'King of industrial chemicals. World\'s most produced chemical. Used in batteries, fertilizers.',atoms:[{e:'S',p:[0,0,0]},{e:'O',p:[1.4,0.8,0]},{e:'O',p:[-1.4,0.8,0]},{e:'O',p:[0.8,-1.4,0]},{e:'O',p:[-0.8,-1.4,0]},{e:'H',p:[1.4,-2.2,0]},{e:'H',p:[-1.4,-2.2,0]}],bonds:[[0,1],[0,2],[0,3],[0,4],[3,5],[4,6]]},
+{name:'Urea',formula:'CH\u2084N\u2082O',cat:'Inorganic',desc:'First organic compound synthesized from inorganic material (1828). Main nitrogen waste in mammals.',atoms:[{e:'C',p:[0,0,0]},{e:'O',p:[0,1.3,0]},{e:'N',p:[-1.1,-0.7,0]},{e:'N',p:[1.1,-0.7,0]},{e:'H',p:[-1.1,-1.9,0]},{e:'H',p:[-2.1,-0.2,0]},{e:'H',p:[1.1,-1.9,0]},{e:'H',p:[2.1,-0.2,0]}],bonds:[[0,1],[0,2],[0,3],[2,4],[2,5],[3,6],[3,7]]},
+{name:'NaCl (Salt)',formula:'NaCl',cat:'Inorganic',desc:'Common table salt. Classic ionic compound. Essential electrolyte for nerve and muscle function.',atoms:[{e:'Na',p:[-1.1,0,0]},{e:'Cl',p:[1.1,0,0]}],bonds:[[0,1]]},
+{name:'Silicon Dioxide',formula:'SiO\u2082',cat:'Inorganic',desc:'Main component of sand and quartz. Used to make glass and computer chips.',atoms:[{e:'Si',p:[0,0,0]},{e:'O',p:[1.6,0,0]},{e:'O',p:[-1.6,0,0]}],bonds:[[0,1],[0,2]]},
+{name:'Hemoglobin (Heme)',formula:'C\u2083\u2084H\u2083\u2083FeN\u2084O\u2084',cat:'Special',desc:'Iron-containing molecule that gives blood its red color. Carries oxygen from lungs to tissues.',atoms:[{e:'Fe',p:[0,0,0]},{e:'N',p:[1.8,0,0]},{e:'N',p:[0,1.8,0]},{e:'N',p:[-1.8,0,0]},{e:'N',p:[0,-1.8,0]},{e:'C',p:[2.8,1.0,0]},{e:'C',p:[1.0,2.8,0]},{e:'C',p:[-2.8,1.0,0]},{e:'C',p:[-1.0,-2.8,0]},{e:'O',p:[0,0,1.8]},{e:'C',p:[3.5,2.5,0]},{e:'C',p:[2.5,3.5,0]}],bonds:[[0,1],[0,2],[0,3],[0,4],[0,9],[1,5],[2,6],[3,7],[4,8],[5,10],[6,11]]},
+{name:'Chlorophyll',formula:'C\u2085\u2085H\u2087\u2082MgN\u2084O\u2085',cat:'Special',desc:'Green pigment powering photosynthesis. Magnesium-centered porphyrin ring. Absorbs red and blue light.',atoms:[{e:'Mg',p:[0,0,0]},{e:'N',p:[1.8,0,0]},{e:'N',p:[0,1.8,0]},{e:'N',p:[-1.8,0,0]},{e:'N',p:[0,-1.8,0]},{e:'C',p:[2.8,1.0,0]},{e:'C',p:[1.0,2.8,0]},{e:'C',p:[-2.8,1.0,0]},{e:'C',p:[-1.0,-2.8,0]},{e:'C',p:[4.0,2.0,0]},{e:'C',p:[2.0,4.0,0]},{e:'C',p:[-4.0,2.0,0]}],bonds:[[0,1],[0,2],[0,3],[0,4],[1,5],[2,6],[3,7],[4,8],[5,9],[6,10],[7,11]]},
+{name:'Estrogen',formula:'C\u2081\u2088H\u2082\u2084O\u2082',cat:'Biological',desc:'Primary female sex hormone. Regulates reproductive system and secondary sex characteristics.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'C',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,2.5,0]},{e:'C',p:[-2.1,3.8,0]},{e:'C',p:[-0.7,3.8,0]},{e:'C',p:[2.8,3.6,0]},{e:'C',p:[4.2,3.6,0]},{e:'O',p:[-0.7,-1.2,0]},{e:'O',p:[4.9,4.8,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[7,8],[8,9],[9,4],[3,10],[10,11],[11,12],[0,12],[11,13]]},
+{name:'Testosterone',formula:'C\u2081\u2089H\u2082\u2088O\u2082',cat:'Biological',desc:'Primary male sex hormone. Drives muscle growth and bone density.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.5,0,0]},{e:'C',p:[2.2,1.3,0]},{e:'C',p:[1.5,2.6,0]},{e:'C',p:[0,2.6,0]},{e:'C',p:[-0.7,1.3,0]},{e:'C',p:[-2.2,1.3,0]},{e:'C',p:[-3.0,2.6,0]},{e:'C',p:[-2.2,3.9,0]},{e:'C',p:[-0.7,3.9,0]},{e:'O',p:[3.7,1.3,0]},{e:'C',p:[2.2,3.9,0]},{e:'C',p:[3.7,3.9,0]},{e:'O',p:[1.5,-1.3,0]},{e:'C',p:[4.4,2.6,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[7,8],[8,9],[9,4],[2,10],[3,11],[11,12],[12,14],[14,2],[0,13]]},
+{name:'Morphine',formula:'C\u2081\u2087H\u2081\u2089NO\u2083',cat:'Special',desc:'Powerful opioid painkiller. Natural alkaloid from opium poppy. Binds to mu-opioid receptors.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'N',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,2.5,0]},{e:'C',p:[-2.8,0,0]},{e:'O',p:[3.5,1.2,0]},{e:'O',p:[-0.7,3.7,0]},{e:'C',p:[-4.2,2.5,0]},{e:'C',p:[-4.2,0,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[6,8],[2,9],[4,10],[7,11],[8,12],[11,12]]}
+];
+
+var CATS=['All'].concat(Array.from(new Set(MOLS.map(function(m){return m.cat;}))));
+var selCat='All',selMol=MOLS[0],autoSpin=true;
+var mainRenderer,mainScene,mainCamera,mainGroup,mainAnimId;
+var modalRenderer,modalScene,modalCamera,modalGroup,modalAnimId,modalSpin=true;
+var dragging=false,prevMx={x:0,y:0},rotX=0.25,rotY=0;
+var mDragging=false,mPrevMx={x:0,y:0},mRotX=0.25,mRotY=0;
+var searchQ='',mainZoomDefault=10;
+
+var thumbR=null;
+function getThumbR(){
+  if(!thumbR){var c=document.createElement('canvas');thumbR=new THREE.WebGLRenderer({canvas:c,alpha:false,antialias:false,preserveDrawingBuffer:true});thumbR.setClearColor(0x050a16,1);}
+  return thumbR;
+}
+
+function buildMol(mol,scale){
+  var grp=new THREE.Group();
+  mol.atoms.forEach(function(a){
+    var r=(AR[a.e]||0.68)*0.52*scale;
+    var mat=new THREE.MeshPhongMaterial({color:new THREE.Color(AC[a.e]||'#888888'),shininess:110,specular:new THREE.Color('#ffffff')});
+    var mesh=new THREE.Mesh(new THREE.SphereGeometry(r,18,18),mat);
+    mesh.position.set(a.p[0]*scale,a.p[1]*scale,a.p[2]*scale);grp.add(mesh);
+  });
+  mol.bonds.forEach(function(b){
+    var i=b[0],j=b[1],a=mol.atoms[i],bv=mol.atoms[j];
+    var sv=new THREE.Vector3(a.p[0]*scale,a.p[1]*scale,a.p[2]*scale);
+    var ev=new THREE.Vector3(bv.p[0]*scale,bv.p[1]*scale,bv.p[2]*scale);
+    var d=ev.clone().sub(sv),len=d.length();
+    if(len<0.001)return;
+    var mat=new THREE.MeshPhongMaterial({color:new THREE.Color('#6688aa'),shininess:50});
+    var cyl=new THREE.Mesh(new THREE.CylinderGeometry(0.05*scale,0.05*scale,len,8),mat);
+    cyl.position.copy(sv.clone().add(ev).multiplyScalar(0.5));
+    cyl.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());grp.add(cyl);
+  });
+  return grp;
+}
+
+function renderThumbToImg(imgEl,mol){
+  try{
+    var R=getThumbR(),W=Math.max(imgEl.parentElement.clientWidth||120,60),H=82;
+    R.setSize(W,H);var scene=new THREE.Scene();var cam=new THREE.PerspectiveCamera(48,W/H,0.1,100);
+    scene.add(new THREE.AmbientLight(0xffffff,0.6));var dl=new THREE.DirectionalLight(0xaabbff,0.9);dl.position.set(4,6,5);scene.add(dl);
+    var grp=buildMol(mol,0.72);scene.add(grp);
+    var box=new THREE.Box3().setFromObject(grp);var sz=box.getSize(new THREE.Vector3()).length();
+    cam.position.z=sz*1.55+1.5;grp.position.sub(box.getCenter(new THREE.Vector3()));grp.rotation.y=Math.random()*Math.PI*2;grp.rotation.x=0.3;
+    R.render(scene,cam);imgEl.src=R.domElement.toDataURL('image/png');
+  }catch(e){}
+}
+
+function filtered(){
+  var arr=selCat==='All'?MOLS.slice():MOLS.filter(function(m){return m.cat===selCat;});
+  if(searchQ)arr=arr.filter(function(m){return m.name.toLowerCase().indexOf(searchQ)>=0||m.formula.toLowerCase().indexOf(searchQ)>=0||m.cat.toLowerCase().indexOf(searchQ)>=0;});
+  return arr;
+}
+function buildTabs(){document.getElementById('tabs').innerHTML=CATS.map(function(c){return '<div class="tab '+(c===selCat?'active':'')+'" onclick="selCatFn(\''+c+'\')">'+c+'</div>';}).join('');}
+function selCatFn(c){selCat=c;buildTabs();buildGrid();}
+
+function buildGrid(){
+  var arr=filtered();
+  document.getElementById('molCount').textContent=arr.length+' molecule'+(arr.length!==1?'s':'')+' shown';
+  var grid=document.getElementById('molGrid');
+  if(!arr.length){grid.innerHTML='<div class="no-results">No molecules found.</div>';return;}
+  grid.innerHTML=arr.map(function(m){var idx=MOLS.indexOf(m);return '<div class="mol-card'+(m===selMol?' selected':'')+'" id="card'+idx+'" onclick="selMolFn('+idx+')" ondblclick="selMolFn('+idx+');openModal()"><div class="thumb-wrap"><span class="thumb-placeholder">⚗</span><img id="th'+idx+'" style="opacity:0;transition:opacity 0.3s;"/></div><div class="mol-name">'+m.name+'</div><div class="mol-formula">'+m.formula+'</div></div>';}).join('');
+  function doNext(list,i){if(i>=list.length)return;var m=list[i],idx=MOLS.indexOf(m),img=document.getElementById('th'+idx);if(img){renderThumbToImg(img,m);img.onload=function(){this.style.opacity='1';};}requestAnimationFrame(function(){doNext(list,i+1);});}
+  requestAnimationFrame(function(){doNext(arr,0);});
+}
+
+function selMolFn(idx){selMol=MOLS[idx];document.querySelectorAll('.mol-card').forEach(function(c){c.classList.remove('selected');});var card=document.getElementById('card'+idx);if(card){card.classList.add('selected');card.scrollIntoView({block:'nearest',behavior:'smooth'});}buildInfo();buildMain();}
+
+function buildInfo(){
+  var m=selMol,uniq=[];
+  m.atoms.forEach(function(a){if(uniq.indexOf(a.e)<0)uniq.push(a.e);});
+  document.getElementById('molInfo').innerHTML='<div class="mol-info-top"><div style="flex:1;min-width:180px;"><div class="mol-bigname">'+m.name+'<span class="mol-bigformula">'+m.formula+'</span><span class="mol-cat-badge">'+m.cat+'</span></div><div class="mol-desc">'+m.desc+'</div><div class="mol-stats"><div class="mol-stat">Atoms: <span>'+m.atoms.length+'</span></div><div class="mol-stat">Bonds: <span>'+m.bonds.length+'</span></div></div><div class="atom-legend">'+uniq.map(function(e){return '<div class="atom-pill"><div class="atom-dot" style="background:'+(AC[e]||'#888')+'"></div>'+e+'</div>';}).join('')+'</div></div></div>';
+}
+
+function buildMain(){
+  cancelAnimationFrame(mainAnimId);
+  var canvas=document.getElementById('mainCanvas');
+  if(mainRenderer){try{mainRenderer.dispose();}catch(e){}}
+  var W=canvas.parentElement.clientWidth||680,H=Math.max(340,Math.round(window.innerHeight*0.52));
+  canvas.style.height=H+'px';
+  mainRenderer=new THREE.WebGLRenderer({canvas:canvas,alpha:false,antialias:true});
+  mainRenderer.setClearColor(0x040810,1);mainRenderer.setPixelRatio(Math.min(window.devicePixelRatio,2));mainRenderer.setSize(W,H);
+  mainScene=new THREE.Scene();mainCamera=new THREE.PerspectiveCamera(42,W/H,0.1,300);
+  mainScene.add(new THREE.AmbientLight(0xffffff,0.4));
+  var d1=new THREE.DirectionalLight(0x88aaff,1.1);d1.position.set(5,8,5);mainScene.add(d1);
+  var d2=new THREE.DirectionalLight(0xff7744,0.35);d2.position.set(-5,-3,-5);mainScene.add(d2);
+  var d3=new THREE.DirectionalLight(0x44ffaa,0.2);d3.position.set(0,-5,5);mainScene.add(d3);
+  for(var i=0;i<150;i++){var s=new THREE.Mesh(new THREE.SphereGeometry(Math.random()*0.045+0.012,4,4),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:Math.random()*0.55+0.2}));var r=55;s.position.set((Math.random()-0.5)*r,(Math.random()-0.5)*r,(Math.random()-0.5)*r-15);mainScene.add(s);}
+  mainGroup=buildMol(selMol,1.3);mainScene.add(mainGroup);
+  var box=new THREE.Box3().setFromObject(mainGroup);var sz=box.getSize(new THREE.Vector3()).length();
+  mainZoomDefault=sz*1.6+3.5;mainCamera.position.z=mainZoomDefault;mainGroup.position.sub(box.getCenter(new THREE.Vector3()));rotX=0.2;rotY=0;
+  function anim(){mainAnimId=requestAnimationFrame(anim);if(autoSpin)rotY+=0.006;mainGroup.rotation.x=rotX;mainGroup.rotation.y=rotY;mainRenderer.render(mainScene,mainCamera);}
+  anim();
+}
+
+document.getElementById('zoomIn').onclick=function(){if(mainCamera)mainCamera.position.z=Math.max(3,mainCamera.position.z-1.5);};
+document.getElementById('zoomOut').onclick=function(){if(mainCamera)mainCamera.position.z=Math.min(35,mainCamera.position.z+1.5);};
+document.getElementById('zoomReset').onclick=function(){if(mainCamera)mainCamera.position.z=mainZoomDefault;};
+
+function openModal(){
+  var m=selMol,modal=document.getElementById('modal');
+  modal.classList.add('open');
+  var uniq=[];m.atoms.forEach(function(a){if(uniq.indexOf(a.e)<0)uniq.push(a.e);});
+  document.getElementById('modalTitle').innerHTML=m.name+'<span class="mf">'+m.formula+'</span><span class="mb">'+m.cat+'</span>';
+  document.getElementById('modalInfo').innerHTML='<div class="modal-info-name">'+m.name+'</div><div class="modal-info-formula">'+m.formula+'</div><div class="modal-info-desc">'+m.desc+'</div><div class="modal-info-stats"><div class="modal-info-stat">Atoms: <span>'+m.atoms.length+'</span></div><div class="modal-info-stat">Bonds: <span>'+m.bonds.length+'</span></div></div><div class="modal-info-legend">'+uniq.map(function(e){return '<div class="atom-pill"><div class="atom-dot" style="background:'+(AC[e]||'#888')+'"></div>'+e+'</div>';}).join('')+'</div>';
+  cancelAnimationFrame(modalAnimId);if(modalRenderer){try{modalRenderer.dispose();modalRenderer=null;}catch(e){}}
+  requestAnimationFrame(function(){
+    var canvas=document.getElementById('modalCanvas'),wrap=canvas.parentElement;
+    var W=wrap.clientWidth||window.innerWidth,H=wrap.clientHeight||(window.innerHeight-60);
+    modalRenderer=new THREE.WebGLRenderer({canvas:canvas,alpha:false,antialias:true});
+    modalRenderer.setClearColor(0x030710,1);modalRenderer.setPixelRatio(Math.min(window.devicePixelRatio,2));modalRenderer.setSize(W,H);
+    modalScene=new THREE.Scene();modalCamera=new THREE.PerspectiveCamera(40,W/H,0.1,300);
+    modalScene.add(new THREE.AmbientLight(0xffffff,0.45));
+    var d1=new THREE.DirectionalLight(0x88aaff,1.3);d1.position.set(5,8,5);modalScene.add(d1);
+    var d2=new THREE.DirectionalLight(0xff7744,0.4);d2.position.set(-5,-3,-5);modalScene.add(d2);
+    var d3=new THREE.DirectionalLight(0x44ffaa,0.25);d3.position.set(0,-5,5);modalScene.add(d3);
+    for(var i=0;i<200;i++){var s=new THREE.Mesh(new THREE.SphereGeometry(Math.random()*0.05+0.01,4,4),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:Math.random()*0.6+0.15}));var rv=80;s.position.set((Math.random()-0.5)*rv,(Math.random()-0.5)*rv,(Math.random()-0.5)*rv-20);modalScene.add(s);}
+    modalGroup=buildMol(m,2.4);modalScene.add(modalGroup);
+    var box=new THREE.Box3().setFromObject(modalGroup);var sz=box.getSize(new THREE.Vector3()).length();
+    modalCamera.position.z=sz*1.5+4;modalGroup.position.sub(box.getCenter(new THREE.Vector3()));mRotX=0.15;mRotY=0;modalSpin=true;
+    document.getElementById('modalSpinBtn').textContent='\u21BB Auto Spin ON';
+    function anim(){modalAnimId=requestAnimationFrame(anim);if(modalSpin)mRotY+=0.005;modalGroup.rotation.x=mRotX;modalGroup.rotation.y=mRotY;modalRenderer.render(modalScene,modalCamera);}
+    anim();
+  });
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');cancelAnimationFrame(modalAnimId);if(modalRenderer){try{modalRenderer.dispose();modalRenderer=null;}catch(e){}}}
+
+document.getElementById('expandBtn').onclick=openModal;
+document.getElementById('modalClose').onclick=closeModal;
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+document.getElementById('modalSpinBtn').onclick=function(){modalSpin=!modalSpin;this.textContent=modalSpin?'\u21BB Auto Spin ON':'\u23F8 Auto Spin OFF';};
+document.getElementById('mZoomIn').onclick=function(){if(modalCamera)modalCamera.position.z=Math.max(3,modalCamera.position.z-2);};
+document.getElementById('mZoomOut').onclick=function(){if(modalCamera)modalCamera.position.z=Math.min(70,modalCamera.position.z+2);};
+
+var mc2=document.getElementById('modalCanvas');
+mc2.addEventListener('mousedown',function(e){mDragging=true;mPrevMx={x:e.clientX,y:e.clientY};modalSpin=false;document.getElementById('modalSpinBtn').textContent='\u23F8 Auto Spin OFF';});
+document.addEventListener('mousemove',function(e){if(!mDragging)return;mRotY+=(e.clientX-mPrevMx.x)*0.007;mRotX+=(e.clientY-mPrevMx.y)*0.007;mPrevMx={x:e.clientX,y:e.clientY};});
+document.addEventListener('mouseup',function(){mDragging=false;});
+mc2.addEventListener('wheel',function(e){if(modalCamera)modalCamera.position.z=Math.max(3,Math.min(70,modalCamera.position.z+e.deltaY*0.04));},{passive:true});
+mc2.addEventListener('touchstart',function(e){mDragging=true;mPrevMx={x:e.touches[0].clientX,y:e.touches[0].clientY};modalSpin=false;document.getElementById('modalSpinBtn').textContent='\u23F8 Auto Spin OFF';},{passive:true});
+mc2.addEventListener('touchmove',function(e){if(!mDragging)return;mRotY+=(e.touches[0].clientX-mPrevMx.x)*0.007;mRotX+=(e.touches[0].clientY-mPrevMx.y)*0.007;mPrevMx={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+mc2.addEventListener('touchend',function(){mDragging=false;},{passive:true});
+
+document.getElementById('spinBtn').onclick=function(){autoSpin=!autoSpin;this.textContent=autoSpin?'\u21BB Auto Spin ON':'\u23F8 Auto Spin OFF';};
+var mc=document.getElementById('mainCanvas');
+mc.addEventListener('mousedown',function(e){dragging=true;prevMx={x:e.clientX,y:e.clientY};autoSpin=false;document.getElementById('spinBtn').textContent='\u23F8 Auto Spin OFF';});
+document.addEventListener('mousemove',function(e){if(!dragging)return;rotY+=(e.clientX-prevMx.x)*0.008;rotX+=(e.clientY-prevMx.y)*0.008;prevMx={x:e.clientX,y:e.clientY};});
+document.addEventListener('mouseup',function(){dragging=false;});
+mc.addEventListener('wheel',function(e){if(mainCamera)mainCamera.position.z=Math.max(3,Math.min(35,mainCamera.position.z+e.deltaY*0.035));},{passive:true});
+mc.addEventListener('touchstart',function(e){dragging=true;prevMx={x:e.touches[0].clientX,y:e.touches[0].clientY};autoSpin=false;document.getElementById('spinBtn').textContent='\u23F8 Auto Spin OFF';},{passive:true});
+mc.addEventListener('touchmove',function(e){if(!dragging)return;rotY+=(e.touches[0].clientX-prevMx.x)*0.008;rotX+=(e.touches[0].clientY-prevMx.y)*0.008;prevMx={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+mc.addEventListener('touchend',function(){dragging=false;},{passive:true});
+
+document.getElementById('searchInput').addEventListener('input',function(){searchQ=this.value.toLowerCase().trim();buildGrid();});
+window.addEventListener('resize',function(){if(selMol)buildMain();});
+buildTabs();buildGrid();buildInfo();buildMain();
+</script>
+</body>
