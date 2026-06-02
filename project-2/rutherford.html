@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rutherford Gold Foil Experiment — 3D Interactive</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+  :root {
+    --gold: #ffd700;
+    --gold-dim: #b8960c;
+    --nucleus: #ff4400;
+    --alpha: #00cfff;
+    --bg: #020408;
+    --panel: rgba(10,20,40,0.92);
+    --border: rgba(255,215,0,0.18);
+    --text: #e8f0ff;
+    --accent: #00cfff;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 2.5rem 1rem 1rem;
+    position: relative;
+    z-index: 10;
+  }
+  header .tag {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  header h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.4rem, 4vw, 2.8rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold) 0%, #fff8dc 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    letter-spacing: 2px;
+  }
+  header p.sub {
+    font-size: 1rem;
+    color: rgba(200,220,255,0.55);
+    margin-top: 0.4rem;
+    letter-spacing: 1px;
+  }
+
+  /* ── CANVAS WRAPPER ── */
+  #canvas-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    aspect-ratio: 16/9;
+  }
+  canvas#scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: radial-gradient(ellipse at 50% 40%, #05101e 0%, #020408 100%);
+    cursor: crosshair;
+  }
+  #canvas-wrap .corner {
+    position: absolute;
+    width: 18px; height: 18px;
+    border-color: var(--gold-dim);
+    border-style: solid;
+    opacity: 0.5;
+  }
+  #canvas-wrap .corner.tl { top:0; left:0; border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
+  #canvas-wrap .corner.tr { top:0; right:0; border-width:2px 2px 0 0; border-radius:0 4px 0 0; }
+  #canvas-wrap .corner.bl { bottom:0; left:0; border-width:0 0 2px 2px; border-radius:0 0 0 4px; }
+  #canvas-wrap .corner.br { bottom:0; right:0; border-width:0 2px 2px 0; border-radius:0 0 4px 0; }
+
+  /* ── CONTROLS BAR ── */
+  #controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    justify-content: center;
+    padding: 1rem 1rem 0.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 0.55rem 1.2rem;
+    border: 1px solid var(--gold-dim);
+    background: transparent;
+    color: var(--gold);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .btn:hover { background: rgba(255,215,0,0.08); border-color: var(--gold); }
+  .btn.active { background: rgba(255,215,0,0.15); border-color: var(--gold); color:#fff; }
+  .btn.accent { border-color: var(--accent); color: var(--accent); }
+  .btn.accent:hover { background: rgba(0,207,255,0.1); }
+
+  /* ── SPEED SLIDER ── */
+  #speed-wrap {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-family: 'Orbitron', monospace; font-size: 0.55rem;
+    color: var(--gold-dim); letter-spacing: 2px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100px; height: 4px;
+    background: rgba(255,215,0,0.2);
+    border-radius: 2px; outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+  }
+
+  /* ── INFO PANELS ── */
+  #info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 900px;
+    margin: 1.2rem auto 0;
+    padding: 0 1rem;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    backdrop-filter: blur(8px);
+  }
+  .panel h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-bottom: 0.7rem;
+    text-transform: uppercase;
+  }
+  .panel p {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: rgba(200,220,255,0.75);
+    font-weight: 300;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255,215,0,0.06);
+    font-size: 0.85rem;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: rgba(200,220,255,0.5); font-weight: 300; }
+  .stat-row .val { color: var(--gold); font-family: 'Orbitron', monospace; font-size: 0.7rem; }
+
+  /* ── LIVE COUNTER ── */
+  #live-stats {
+    display: flex; gap: 2rem; justify-content: center;
+    padding: 0.8rem 1rem;
+    max-width: 900px;
+    margin: 0.8rem auto 0;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    flex-wrap: wrap;
+  }
+  .live-item { text-align: center; }
+  .live-item .lval {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: block;
+  }
+  .live-item .lval.gold { color: var(--gold); }
+  .live-item .lval.blue { color: var(--accent); }
+  .live-item .lval.red  { color: #ff6644; }
+  .live-item .llabel {
+    font-size: 0.68rem;
+    color: rgba(200,220,255,0.45);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── LEGEND ── */
+  #legend {
+    display: flex; gap: 1.5rem; justify-content: center;
+    flex-wrap: wrap;
+    padding: 0.6rem 1rem;
+    max-width: 900px;
+    margin: 0.8rem auto 0;
+    font-size: 0.8rem;
+    color: rgba(200,220,255,0.55);
+  }
+  .leg-item { display: flex; align-items: center; gap: 0.4rem; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── THEORY ACCORDION ── */
+  #theory {
+    max-width: 900px;
+    margin: 1.2rem auto 0;
+    padding: 0 1rem;
+  }
+  .accordion {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.6rem;
+    overflow: hidden;
+  }
+  .acc-head {
+    padding: 1rem 1.4rem;
+    cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    transition: background 0.2s;
+  }
+  .acc-head:hover { background: rgba(255,215,0,0.05); }
+  .acc-head .arrow { transition: transform 0.3s; font-size: 0.8rem; color: var(--gold-dim); }
+  .acc-head.open .arrow { transform: rotate(180deg); }
+  .acc-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease;
+    padding: 0 1.4rem;
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: rgba(200,220,255,0.72);
+    font-weight: 300;
+  }
+  .acc-body.open { max-height: 600px; padding: 0 1.4rem 1.2rem; }
+  .acc-body ul { padding-left: 1.2rem; margin-top: 0.5rem; }
+  .acc-body li { margin-bottom: 0.3rem; }
+  .acc-body strong { color: var(--gold); font-weight: 600; }
+
+  /* ── TOOLTIP ── */
+  #tooltip {
+    position: fixed;
+    background: rgba(5,15,30,0.95);
+    border: 1px solid var(--gold-dim);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    pointer-events: none;
+    display: none;
+    z-index: 999;
+    max-width: 200px;
+    line-height: 1.5;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.78rem;
+    color: rgba(200,220,255,0.3);
+    letter-spacing: 1px;
+    margin-top: 2rem;
+  }
+  footer span { color: var(--gold-dim); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: #020408; }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div id="tooltip"></div>
+
+<header>
+  <div class="tag">Ernest Rutherford · 1911</div>
+  <h1>Gold Foil Experiment</h1>
+  <p class="sub">Interactive 3D Simulation · Atomic Structure Discovery</p>
+</header>
+
+<div id="canvas-wrap">
+  <canvas id="scene"></canvas>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+</div>
+
+<div id="controls">
+  <button class="btn active" id="btn-play" onclick="togglePlay()">⏸ PAUSE</button>
+  <button class="btn" id="btn-reset" onclick="resetSim()">↺ RESET</button>
+  <button class="btn accent" id="btn-view" onclick="toggleView()">◈ TOP VIEW</button>
+  <button class="btn" id="btn-trail" onclick="toggleTrails()">◌ TRAILS ON</button>
+  <div id="speed-wrap">
+    SPEED
+    <input type="range" id="speed-slider" min="0.2" max="3" step="0.1" value="1" oninput="setSpeed(this.value)">
+    <span id="speed-val">1.0×</span>
+  </div>
+</div>
+
+<div id="live-stats">
+  <div class="live-item">
+    <span class="lval gold" id="cnt-fired">0</span>
+    <span class="llabel">Particles Fired</span>
+  </div>
+  <div class="live-item">
+    <span class="lval blue" id="cnt-pass">0</span>
+    <span class="llabel">Passed Through</span>
+  </div>
+  <div class="live-item">
+    <span class="lval gold" id="cnt-deflect">0</span>
+    <span class="llabel">Deflected</span>
+  </div>
+  <div class="live-item">
+    <span class="lval red" id="cnt-back">0</span>
+    <span class="llabel">Bounced Back</span>
+  </div>
+</div>
+
+<div id="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:#00cfff"></div> Alpha Particle (α)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#ffd700"></div> Gold Atom</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#ff4400"></div> Nucleus</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#4488ff"></div> Electron Cloud</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#88ff44;opacity:0.5"></div> Trail Path</div>
+</div>
+
+<div id="info-grid">
+  <div class="panel">
+    <h3>Experiment Stats</h3>
+    <div class="stat-row"><span class="label">Gold Foil Thickness</span><span class="val">~0.4 µm</span></div>
+    <div class="stat-row"><span class="label">Gold Atom Layers</span><span class="val">~1000</span></div>
+    <div class="stat-row"><span class="label">Alpha Source</span><span class="val">Radium-226</span></div>
+    <div class="stat-row"><span class="label">Alpha Speed</span><span class="val">~5% of c</span></div>
+    <div class="stat-row"><span class="label">Deflection &gt; 90°</span><span class="val">1 in 8000</span></div>
+    <div class="stat-row"><span class="label">Nucleus Diameter</span><span class="val">~10⁻¹⁴ m</span></div>
+    <div class="stat-row"><span class="label">Year of Discovery</span><span class="val">1911</span></div>
+  </div>
+  <div class="panel">
+    <h3>Key Discovery</h3>
+    <p>
+      Rutherford's experiment shattered the <strong>Thomson Plum Pudding Model</strong>. 
+      Most alpha particles passed straight through — proving atoms are <strong>mostly empty space</strong>. 
+      The rare large-angle deflections revealed a tiny, dense, positively charged <strong>nucleus</strong> at the center, 
+      surrounded by electrons at a relatively vast distance.
+    </p>
+  </div>
+</div>
+
+<div id="theory">
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      Before the Experiment — Thomson's Model
+      <span class="arrow">▾</span>
+    </div>
+    <div class="acc-body">
+      <p>
+        In 1904, J.J. Thomson proposed the <strong>Plum Pudding Model</strong>. He imagined the atom as a 
+        diffuse sphere of positive charge (the "pudding") with electrons embedded throughout (the "plums").
+        In this model, the positive charge is spread uniformly — so no region is dense enough to cause large deflections.
+      </p>
+      <p style="margin-top:0.6rem">
+        If Thomson's model were correct, all alpha particles would pass through with only tiny deflections 
+        of less than a few degrees. Rutherford initially expected exactly this result.
+      </p>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      The Experimental Setup
+      <span class="arrow">▾</span>
+    </div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>Source:</strong> Radioactive radium emits alpha particles (helium nuclei — 2 protons + 2 neutrons).</li>
+        <li><strong>Collimator:</strong> A lead block with a narrow slit focuses alpha particles into a beam.</li>
+        <li><strong>Target:</strong> An extremely thin gold foil (~0.4 micrometres — about 1000 atoms thick).</li>
+        <li><strong>Detector:</strong> A movable zinc sulfide (ZnS) screen that produces a flash of light when struck by an alpha particle.</li>
+        <li><strong>Geiger &amp; Marsden</strong> counted flashes at various angles around the foil, including behind the source.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      Observations &amp; What They Proved
+      <span class="arrow">▾</span>
+    </div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>Most particles (~98%):</strong> Passed straight through or with very small deflections → The atom is <strong>mostly empty space</strong>.</li>
+        <li><strong>Some particles:</strong> Were deflected at small angles → Slight electrostatic repulsion exists.</li>
+        <li><strong>~1 in 8000 particles:</strong> Bounced back at angles &gt; 90° → An extremely small, dense, positively charged region exists at the center.</li>
+      </ul>
+      <p style="margin-top:0.7rem">
+        Rutherford famously said: <em>"It was almost as incredible as if you fired 15-inch shells at tissue paper 
+        and they came back and hit you."</em>
+      </p>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      Rutherford's Nuclear Model (1911)
+      <span class="arrow">▾</span>
+    </div>
+    <div class="acc-body">
+      <p>Based on the results, Rutherford proposed a revolutionary new model:</p>
+      <ul style="margin-top:0.6rem">
+        <li>The atom has a tiny, extremely dense, positively charged <strong>nucleus</strong> at its center.</li>
+        <li>The nucleus contains almost all of the atom's <strong>mass</strong>.</li>
+        <li>Electrons orbit the nucleus at a relatively <strong>vast distance</strong>, like planets around the sun.</li>
+        <li>The atom is <strong>mostly empty space</strong> — the nucleus is about 100,000 times smaller than the atom.</li>
+        <li>The positive charge of the nucleus is what deflects positively charged alpha particles via <strong>Coulomb repulsion</strong>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      Scientific Significance &amp; Legacy
+      <span class="arrow">▾</span>
+    </div>
+    <div class="acc-body">
+      <p>
+        The Gold Foil Experiment is considered one of the most important experiments in the history of science.
+      </p>
+      <ul style="margin-top:0.6rem">
+        <li>It established the <strong>nuclear model of the atom</strong>, which is the foundation of modern atomic physics.</li>
+        <li>It disproved Thomson's Plum Pudding Model completely.</li>
+        <li>It led to the discovery of the <strong>proton</strong> (Rutherford, 1917).</li>
+        <li>It inspired Niels Bohr to develop the <strong>Bohr model</strong> (1913) with quantized electron orbits.</li>
+        <li>It laid the groundwork for <strong>nuclear physics</strong> and ultimately nuclear energy and medicine.</li>
+        <li>Gold was used because it can be beaten into extremely thin sheets without breaking (high ductility).</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>3D-CHEMISTRY LAB</span> · Rutherford Gold Foil Experiment Simulation · © 2025 · All Rights Reserved<br>
+  <span style="font-size:0.68rem;color:rgba(200,220,255,0.2);margin-top:0.3rem;display:block">Protected Content — Unauthorized reproduction prohibited</span>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   PROTECTION
+═══════════════════════════════════════════════════════ */
+document.addEventListener('contextmenu', e => { e.preventDefault(); showBlockMsg(e); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12') e.preventDefault();
+  if (e.ctrlKey && ['u','s','c','a','p'].includes(e.key.toLowerCase())) e.preventDefault();
+  if (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) e.preventDefault();
+});
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+
+let blockMsg = null;
+function showBlockMsg(e) {
+  if (!blockMsg) {
+    blockMsg = document.createElement('div');
+    Object.assign(blockMsg.style, {
+      position:'fixed', zIndex:'9999',
+      background:'rgba(5,15,30,0.97)',
+      border:'1px solid #ffd700',
+      color:'#ffd700',
+      padding:'0.7rem 1.4rem',
+      borderRadius:'8px',
+      fontFamily:'Orbitron,monospace',
+      fontSize:'0.7rem',
+      letterSpacing:'2px',
+      pointerEvents:'none'
+    });
+    blockMsg.textContent = '⛔ RIGHT CLICK BLOCKED';
+    document.body.appendChild(blockMsg);
+  }
+  blockMsg.style.left = e.clientX + 'px';
+  blockMsg.style.top  = e.clientY + 'px';
+  blockMsg.style.display = 'block';
+  setTimeout(() => { if(blockMsg) blockMsg.style.display='none'; }, 1400);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CANVAS SETUP
+═══════════════════════════════════════════════════════ */
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+
+let W, H;
+function resize() {
+  const wrap = document.getElementById('canvas-wrap');
+  W = canvas.width  = wrap.clientWidth;
+  H = canvas.height = wrap.clientHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* ═══════════════════════════════════════════════════════
+   SIMULATION STATE
+═══════════════════════════════════════════════════════ */
+let playing = true;
+let topView = false;
+let showTrails = true;
+let simSpeed = 1.0;
+let tick = 0;
+
+let cntFired = 0, cntPass = 0, cntDeflect = 0, cntBack = 0;
+
+// Gold foil atoms — arrange in a grid centered on canvas
+const ATOM_ROWS = 4, ATOM_COLS = 5;
+let atoms = [];
+
+function buildAtoms() {
+  atoms = [];
+  const cx = W * 0.5, cy = H * 0.5;
+  const gapX = W * 0.055, gapY = H * 0.10;
+  for (let r = 0; r < ATOM_ROWS; r++) {
+    for (let c = 0; c < ATOM_COLS; c++) {
+      atoms.push({
+        x: cx + (c - (ATOM_COLS-1)/2) * gapX,
+        y: cy + (r - (ATOM_ROWS-1)/2) * gapY,
+        r: W * 0.025, // electron cloud radius
+        nr: W * 0.006, // nucleus radius
+        pulse: Math.random() * Math.PI * 2,
+        electronAngles: [0, Math.PI*2/3, Math.PI*4/3].map(a => a + Math.random()*0.5)
+      });
+    }
+  }
+}
+buildAtoms();
+
+// Alpha particles
+let particles = [];
+const MAX_PARTICLES = 40;
+
+function spawnParticle() {
+  if (particles.length >= MAX_PARTICLES) return;
+  const y0 = H * (0.12 + Math.random() * 0.76);
+  const speed = (1.8 + Math.random() * 0.8) * simSpeed;
+  particles.push({
+    x: W * 0.03,
+    y: y0,
+    vx: speed,
+    vy: (Math.random() - 0.5) * 0.3 * simSpeed,
+    trail: [],
+    state: 'active', // active | done
+    outcome: null,   // pass | deflect | backscatter
+    age: 0,
+    alpha: 1
+  });
+  cntFired++;
+  document.getElementById('cnt-fired').textContent = cntFired;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PHYSICS — Coulomb repulsion from each nucleus
+═══════════════════════════════════════════════════════ */
+function updateParticle(p) {
+  if (p.state === 'done') {
+    p.alpha -= 0.012;
+    return;
+  }
+  p.age++;
+  const dt = 1;
+
+  for (const atom of atoms) {
+    const dx = p.x - atom.x;
+    const dy = p.y - atom.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const minDist = atom.nr * 3.5;
+    if (dist < atom.r * 2.2) {
+      const strength = 520 / (dist * dist + 80);
+      p.vx += (dx / dist) * strength * dt * simSpeed;
+      p.vy += (dy / dist) * strength * dt * simSpeed;
+    }
+    // Hard collision with nucleus
+    if (dist < minDist) {
+      const nx = dx/dist, ny = dy/dist;
+      const dot = p.vx*nx + p.vy*ny;
+      p.vx -= 2*dot*nx;
+      p.vy -= 2*dot*ny;
+      p.vx *= 0.7; p.vy *= 0.7;
+    }
+  }
+
+  p.x += p.vx * simSpeed;
+  p.y += p.vy * simSpeed;
+
+  if (showTrails) {
+    p.trail.push({x: p.x, y: p.y});
+    if (p.trail.length > 80) p.trail.shift();
+  }
+
+  // Off-screen → classify & retire
+  if (p.x > W * 0.97 || p.x < W * 0.01 || p.y < 0 || p.y > H) {
+    p.state = 'done';
+    const angle = Math.atan2(p.vy, p.vx) * 180 / Math.PI;
+    if (p.x < W * 0.3 && (angle > 120 || angle < -120)) {
+      p.outcome = 'backscatter';
+      cntBack++;
+      document.getElementById('cnt-back').textContent = cntBack;
+    } else if (Math.abs(p.vy / (Math.abs(p.vx)+0.001)) > 0.15 || Math.abs(angle) > 8) {
+      p.outcome = 'deflect';
+      cntDeflect++;
+      document.getElementById('cnt-deflect').textContent = cntDeflect;
+    } else {
+      p.outcome = 'pass';
+      cntPass++;
+      document.getElementById('cnt-pass').textContent = cntPass;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW FUNCTIONS
+═══════════════════════════════════════════════════════ */
+function drawStarfield() {
+  // Static starfield (draw once per frame is fine at 60fps)
+  ctx.save();
+  for (let i = 0; i < 60; i++) {
+    const sx = (Math.sin(i * 127.1) * 0.5 + 0.5) * W;
+    const sy = (Math.sin(i * 311.7) * 0.5 + 0.5) * H;
+    const r = (Math.sin(i * 53.3) * 0.5 + 0.5) * 1.5 + 0.3;
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(180,200,255,${0.15 + Math.sin(tick*0.02 + i)*0.1})`;
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawFoilLine() {
+  ctx.save();
+  const cx = W * 0.5;
+  ctx.strokeStyle = 'rgba(255,215,0,0.18)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,6]);
+  ctx.beginPath();
+  ctx.moveTo(cx, H * 0.02);
+  ctx.lineTo(cx, H * 0.98);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // Label
+  ctx.font = `${W*0.012}px Orbitron, monospace`;
+  ctx.fillStyle = 'rgba(255,215,0,0.3)';
+  ctx.textAlign = 'center';
+  ctx.fillText('GOLD FOIL', cx, H * 0.045);
+  ctx.restore();
+}
+
+function drawSource() {
+  ctx.save();
+  const sx = W * 0.055, sy = H * 0.5;
+  // Glow
+  const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, W*0.04);
+  g.addColorStop(0, 'rgba(0,207,255,0.3)');
+  g.addColorStop(1, 'rgba(0,207,255,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(sx, sy, W*0.04, 0, Math.PI*2);
+  ctx.fill();
+  // Box
+  ctx.fillStyle = 'rgba(0,50,80,0.9)';
+  ctx.strokeStyle = '#00cfff';
+  ctx.lineWidth = 1.5;
+  const bw = W*0.038, bh = H*0.12;
+  ctx.beginPath();
+  ctx.roundRect(sx - bw/2, sy - bh/2, bw, bh, 4);
+  ctx.fill();
+  ctx.stroke();
+  ctx.font = `bold ${W*0.01}px Orbitron, monospace`;
+  ctx.fillStyle = '#00cfff';
+  ctx.textAlign = 'center';
+  ctx.fillText('α', sx, sy+3);
+  ctx.font = `${W*0.007}px Rajdhani, sans-serif`;
+  ctx.fillStyle = 'rgba(0,207,255,0.6)';
+  ctx.fillText('SOURCE', sx, sy + H*0.065);
+  ctx.restore();
+}
+
+function drawDetectorScreen() {
+  ctx.save();
+  const dx = W * 0.94;
+  // Screen glow
+  const g = ctx.createLinearGradient(dx-2, 0, dx+8, 0);
+  g.addColorStop(0, 'rgba(0,207,255,0.0)');
+  g.addColorStop(0.5, 'rgba(0,207,255,0.12)');
+  g.addColorStop(1, 'rgba(0,207,255,0.0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(dx-4, H*0.05, 14, H*0.9);
+  // Line
+  ctx.strokeStyle = 'rgba(0,207,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(dx, H*0.05);
+  ctx.lineTo(dx, H*0.95);
+  ctx.stroke();
+  ctx.font = `${W*0.009}px Rajdhani, sans-serif`;
+  ctx.fillStyle = 'rgba(0,207,255,0.5)';
+  ctx.textAlign = 'center';
+  ctx.fillText('ZnS SCREEN', dx, H*0.028);
+  ctx.restore();
+}
+
+function drawAtom(atom) {
+  ctx.save();
+  atom.pulse += 0.025;
+  const pulseFactor = 1 + Math.sin(atom.pulse) * 0.04;
+
+  // Electron cloud (diffuse glow)
+  const cg = ctx.createRadialGradient(atom.x, atom.y, 0, atom.x, atom.y, atom.r * pulseFactor);
+  cg.addColorStop(0, 'rgba(50,100,255,0.22)');
+  cg.addColorStop(0.6, 'rgba(30,70,200,0.10)');
+  cg.addColorStop(1, 'rgba(20,40,150,0)');
+  ctx.fillStyle = cg;
+  ctx.beginPath();
+  ctx.arc(atom.x, atom.y, atom.r * pulseFactor, 0, Math.PI*2);
+  ctx.fill();
+
+  // Electron orbits
+  ctx.strokeStyle = 'rgba(80,140,255,0.18)';
+  ctx.lineWidth = 0.7;
+  [atom.r*0.55, atom.r*0.82, atom.r*1.0].forEach(r => {
+    ctx.beginPath();
+    ctx.arc(atom.x, atom.y, r, 0, Math.PI*2);
+    ctx.stroke();
+  });
+
+  // Electrons
+  for (let i = 0; i < atom.electronAngles.length; i++) {
+    atom.electronAngles[i] += 0.04 + i * 0.015;
+    const er = atom.r * [0.55, 0.82, 1.0][i];
+    const ex = atom.x + Math.cos(atom.electronAngles[i]) * er;
+    const ey = atom.y + Math.sin(atom.electronAngles[i]) * er;
+    ctx.beginPath();
+    ctx.arc(ex, ey, 2, 0, Math.PI*2);
+    ctx.fillStyle = '#4488ff';
+    ctx.fill();
+  }
+
+  // Nucleus glow
+  const ng = ctx.createRadialGradient(atom.x, atom.y, 0, atom.x, atom.y, atom.nr * 2.5);
+  ng.addColorStop(0, 'rgba(255,120,30,0.9)');
+  ng.addColorStop(0.5, 'rgba(255,68,0,0.5)');
+  ng.addColorStop(1, 'rgba(255,68,0,0)');
+  ctx.fillStyle = ng;
+  ctx.beginPath();
+  ctx.arc(atom.x, atom.y, atom.nr * 2.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // Nucleus core
+  ctx.beginPath();
+  ctx.arc(atom.x, atom.y, atom.nr, 0, Math.PI*2);
+  ctx.fillStyle = '#ff6622';
+  ctx.fill();
+  ctx.strokeStyle = '#ffaa44';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawParticle(p) {
+  if (p.alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = p.alpha;
+
+  // Trail
+  if (showTrails && p.trail.length > 1) {
+    ctx.beginPath();
+    ctx.moveTo(p.trail[0].x, p.trail[0].y);
+    for (let i = 1; i < p.trail.length; i++) {
+      ctx.lineTo(p.trail[i].x, p.trail[i].y);
+    }
+    const trailColor = p.outcome === 'backscatter' ? '255,80,50' :
+                       p.outcome === 'deflect' ? '255,200,0' : '0,207,255';
+    ctx.strokeStyle = `rgba(${trailColor},0.35)`;
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+
+  // Particle
+  const col = p.outcome === 'backscatter' ? ['rgba(255,80,50,0.4)','#ff4422'] :
+              p.outcome === 'deflect'      ? ['rgba(255,200,0,0.4)','#ffcc00'] :
+                                             ['rgba(0,207,255,0.35)','#00cfff'];
+  const pg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 7);
+  pg.addColorStop(0, col[1]);
+  pg.addColorStop(1, col[0].replace('0.4','0'));
+  ctx.fillStyle = pg;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 7, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawTopViewNote() {
+  ctx.save();
+  ctx.font = `${W*0.012}px Orbitron, monospace`;
+  ctx.fillStyle = 'rgba(255,215,0,0.35)';
+  ctx.textAlign = 'right';
+  ctx.fillText('TOP VIEW', W - 10, H - 8);
+  ctx.restore();
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN LOOP
+═══════════════════════════════════════════════════════ */
+function loop() {
+  requestAnimationFrame(loop);
+  if (!playing) { drawStatic(); return; }
+
+  tick++;
+  ctx.clearRect(0, 0, W, H);
+
+  drawStarfield();
+  drawFoilLine();
+  drawSource();
+  drawDetectorScreen();
+
+  atoms.forEach(drawAtom);
+
+  // Spawn particles periodically
+  if (tick % Math.round(18 / simSpeed) === 0) spawnParticle();
+
+  // Update & draw
+  particles = particles.filter(p => p.alpha > 0);
+  particles.forEach(p => {
+    updateParticle(p);
+    drawParticle(p);
+  });
+
+  if (topView) drawTopViewNote();
+}
+
+function drawStatic() {
+  ctx.clearRect(0, 0, W, H);
+  drawStarfield();
+  drawFoilLine();
+  drawSource();
+  drawDetectorScreen();
+  atoms.forEach(drawAtom);
+  particles.forEach(drawParticle);
+  if (topView) drawTopViewNote();
+}
+
+/* ═══════════════════════════════════════════════════════
+   UI CONTROLS
+═══════════════════════════════════════════════════════ */
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('btn-play').textContent = playing ? '⏸ PAUSE' : '▶ PLAY';
+  document.getElementById('btn-play').classList.toggle('active', playing);
+}
+
+function resetSim() {
+  particles = [];
+  cntFired = cntPass = cntDeflect = cntBack = 0;
+  ['cnt-fired','cnt-pass','cnt-deflect','cnt-back'].forEach(id => document.getElementById(id).textContent = '0');
+  buildAtoms();
+  tick = 0;
+}
+
+function toggleView() {
+  topView = !topView;
+  const btn = document.getElementById('btn-view');
+  btn.textContent = topView ? '◈ SIDE VIEW' : '◈ TOP VIEW';
+  btn.classList.toggle('active', topView);
+}
+
+function toggleTrails() {
+  showTrails = !showTrails;
+  const btn = document.getElementById('btn-trail');
+  btn.textContent = showTrails ? '◌ TRAILS ON' : '◌ TRAILS OFF';
+  btn.classList.toggle('active', showTrails);
+}
+
+function setSpeed(val) {
+  simSpeed = parseFloat(val);
+  document.getElementById('speed-val').textContent = simSpeed.toFixed(1) + '×';
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACCORDION
+═══════════════════════════════════════════════════════ */
+function toggleAcc(head) {
+  const body = head.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.acc-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.acc-head').forEach(h => h.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); head.classList.add('open'); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOOLTIP ON CANVAS HOVER
+═══════════════════════════════════════════════════════ */
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = W / rect.width, scaleY = H / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top)  * scaleY;
+
+  let hit = null;
+  for (const a of atoms) {
+    if (Math.sqrt((mx-a.x)**2+(my-a.y)**2) < a.r) { hit = 'atom'; break; }
+  }
+  if (!hit && mx < W*0.1) hit = 'source';
+  if (!hit && mx > W*0.9) hit = 'screen';
+
+  if (hit === 'atom') {
+    tooltip.innerHTML = '<strong style="color:#ffd700">Gold Atom (Au)</strong><br>Atomic No: 79 · Z=79<br>Nucleus: +79 charge<br>Radius: ~144 pm';
+    tooltip.style.display = 'block';
+  } else if (hit === 'source') {
+    tooltip.innerHTML = '<strong style="color:#00cfff">Alpha Source</strong><br>Radium-226 emits<br>α particles (He²⁺)<br>Speed: ~5% of light';
+    tooltip.style.display = 'block';
+  } else if (hit === 'screen') {
+    tooltip.innerHTML = '<strong style="color:#00cfff">ZnS Detector</strong><br>Zinc Sulfide screen<br>Flashes on α impact<br>Counts deflections';
+    tooltip.style.display = 'block';
+  } else {
+    tooltip.style.display = 'none';
+  }
+  tooltip.style.left = (e.clientX + 14) + 'px';
+  tooltip.style.top  = (e.clientY - 10) + 'px';
+});
+canvas.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+/* ═══════════════════════════════════════════════════════
+   START
+═══════════════════════════════════════════════════════ */
+loop();
+</script>
+</body>
+</html>
