@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bohr's Atomic Model — 3D Interactive</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+  :root {
+    --gold: #ffd700; --gold-dim: #b8960c; --bg: #020408;
+    --panel: rgba(10,20,40,0.92); --border: rgba(255,215,0,0.18);
+    --text: #e8f0ff; --accent: #00cfff; --red: #ff4455; --green: #44ffaa;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+  body { background:var(--bg); font-family:'Rajdhani',sans-serif; color:var(--text); overflow-x:hidden; min-height:100vh; }
+  header { text-align:center; padding:2rem 1rem 0.8rem; position:relative; z-index:10; }
+  .back-btn { position:absolute; left:1.2rem; top:1.5rem; font-family:'Orbitron',monospace; font-size:0.5rem; letter-spacing:2px; color:var(--gold-dim); text-decoration:none; border:1px solid rgba(255,215,0,0.2); padding:0.4rem 0.9rem; border-radius:6px; transition:all 0.2s; }
+  .back-btn:hover { color:var(--gold); border-color:var(--gold-dim); }
+  .tag { font-family:'Orbitron',monospace; font-size:0.6rem; letter-spacing:4px; color:var(--gold-dim); text-transform:uppercase; margin-bottom:0.4rem; }
+  header h1 { font-family:'Orbitron',monospace; font-size:clamp(1.3rem,4vw,2.6rem); font-weight:900; background:linear-gradient(135deg,var(--gold) 0%,#fff8dc 50%,var(--gold) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:2px; }
+  header p.sub { font-size:0.95rem; color:rgba(200,220,255,0.5); margin-top:0.3rem; letter-spacing:1px; }
+  #three-wrap { position:relative; width:100%; max-width:960px; margin:0.8rem auto 0; aspect-ratio:16/9; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#020408; }
+  #three-wrap canvas { display:block; width:100%!important; height:100%!important; }
+  .corner { position:absolute; width:18px; height:18px; border-color:var(--gold-dim); border-style:solid; opacity:0.5; pointer-events:none; }
+  .corner.tl{top:0;left:0;border-width:2px 0 0 2px;border-radius:4px 0 0 0;}
+  .corner.tr{top:0;right:0;border-width:2px 2px 0 0;border-radius:0 4px 0 0;}
+  .corner.bl{bottom:0;left:0;border-width:0 0 2px 2px;border-radius:0 0 0 4px;}
+  .corner.br{bottom:0;right:0;border-width:0 2px 2px 0;border-radius:0 0 4px 0;}
+  #hint { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-family:'Orbitron',monospace; font-size:0.45rem; letter-spacing:2px; color:rgba(255,215,0,0.35); pointer-events:none; white-space:nowrap; }
+  /* Quantum jump label overlay */
+  #jump-label { position:absolute; top:12px; right:14px; font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:2px; color:var(--accent); background:rgba(0,10,25,0.85); border:1px solid rgba(0,207,255,0.3); border-radius:6px; padding:0.35rem 0.7rem; pointer-events:none; opacity:0; transition:opacity 0.4s; }
+  #jump-label.visible { opacity:1; }
+  #controls { display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:center; padding:0.8rem 1rem 0.4rem; max-width:960px; margin:0 auto; }
+  .btn { font-family:'Orbitron',monospace; font-size:0.58rem; letter-spacing:2px; padding:0.5rem 1.1rem; border:1px solid var(--gold-dim); background:transparent; color:var(--gold); border-radius:6px; cursor:pointer; transition:all 0.2s; text-transform:uppercase; }
+  .btn:hover { background:rgba(255,215,0,0.08); border-color:var(--gold); }
+  .btn.active { background:rgba(255,215,0,0.15); border-color:var(--gold); color:#fff; }
+  .btn.accent { border-color:var(--accent); color:var(--accent); }
+  .btn.accent:hover { background:rgba(0,207,255,0.1); }
+  .btn.red { border-color:var(--red); color:var(--red); }
+  .btn.red:hover { background:rgba(255,68,85,0.1); }
+  #speed-wrap { display:flex; align-items:center; gap:0.5rem; font-family:'Orbitron',monospace; font-size:0.52rem; color:var(--gold-dim); letter-spacing:2px; }
+  input[type=range] { -webkit-appearance:none; width:90px; height:3px; background:rgba(255,215,0,0.2); border-radius:2px; outline:none; cursor:pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:var(--gold); cursor:pointer; }
+  #live-stats { display:flex; gap:1.5rem; justify-content:center; padding:0.7rem 1rem; max-width:960px; margin:0.6rem auto 0; background:var(--panel); border:1px solid var(--border); border-radius:10px; flex-wrap:wrap; }
+  .live-item { text-align:center; }
+  .live-item .lval { font-family:'Orbitron',monospace; font-size:1.4rem; font-weight:700; display:block; }
+  .lval.gold{color:var(--gold);} .lval.blue{color:var(--accent);} .lval.red{color:#ff6644;} .lval.green{color:var(--green);}
+  .live-item .llabel { font-size:0.62rem; color:rgba(200,220,255,0.4); letter-spacing:2px; text-transform:uppercase; }
+  #legend { display:flex; gap:1.2rem; justify-content:center; flex-wrap:wrap; padding:0.5rem 1rem; max-width:960px; margin:0.6rem auto 0; font-size:0.78rem; color:rgba(200,220,255,0.55); }
+  .leg-item { display:flex; align-items:center; gap:0.35rem; }
+  .leg-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  #info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; max-width:960px; margin:1rem auto 0; padding:0 1rem; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:1.1rem 1.3rem; backdrop-filter:blur(8px); }
+  .panel h3 { font-family:'Orbitron',monospace; font-size:0.58rem; letter-spacing:3px; color:var(--gold); margin-bottom:0.6rem; text-transform:uppercase; }
+  .panel p { font-size:0.88rem; line-height:1.65; color:rgba(200,220,255,0.72); font-weight:300; }
+  .stat-row { display:flex; justify-content:space-between; align-items:center; padding:0.3rem 0; border-bottom:1px solid rgba(255,215,0,0.06); font-size:0.82rem; }
+  .stat-row:last-child{border-bottom:none;}
+  .stat-row .label{color:rgba(200,220,255,0.5);font-weight:300;}
+  .stat-row .val{color:var(--gold);font-family:'Orbitron',monospace;font-size:0.65rem;}
+  /* Energy level selector */
+  #shell-selector { max-width:960px; margin:0.8rem auto 0; padding:0 1rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; justify-content:center; }
+  .shell-btn { font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:2px; padding:0.4rem 0.9rem; border:1px solid rgba(255,215,0,0.25); background:transparent; color:rgba(255,215,0,0.6); border-radius:6px; cursor:pointer; transition:all 0.25s; }
+  .shell-btn:hover { border-color:var(--gold); color:var(--gold); background:rgba(255,215,0,0.07); }
+  .shell-btn.sel { border-color:var(--accent); color:var(--accent); background:rgba(0,207,255,0.12); }
+  .shell-label { font-family:'Orbitron',monospace; font-size:0.52rem; color:var(--gold-dim); letter-spacing:2px; }
+  #theory { max-width:960px; margin:1rem auto 0; padding:0 1rem 3rem; }
+  #theory h2 { font-family:'Orbitron',monospace; font-size:0.7rem; letter-spacing:4px; color:var(--gold-dim); text-transform:uppercase; margin-bottom:1rem; text-align:center; }
+  .accordion { background:var(--panel); border:1px solid var(--border); border-radius:10px; margin-bottom:0.5rem; overflow:hidden; }
+  .acc-head { padding:0.9rem 1.3rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:'Orbitron',monospace; font-size:0.6rem; letter-spacing:2px; color:var(--gold); text-transform:uppercase; transition:background 0.2s; }
+  .acc-head:hover{background:rgba(255,215,0,0.05);}
+  .acc-head .arrow{transition:transform 0.3s;font-size:0.8rem;color:var(--gold-dim);}
+  .acc-head.open .arrow{transform:rotate(180deg);}
+  .acc-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease; padding:0 1.3rem; font-size:0.88rem; line-height:1.75; color:rgba(200,220,255,0.72); font-weight:300; }
+  .acc-body.open{max-height:900px;padding:0 1.3rem 1.1rem;}
+  .acc-body ul{padding-left:1.1rem;margin-top:0.5rem;}
+  .acc-body li{margin-bottom:0.4rem;}
+  .acc-body strong{color:var(--gold);font-weight:600;}
+  .acc-body em{color:var(--accent);font-style:italic;}
+  .formula-box { color:var(--gold); font-family:'Orbitron',monospace; font-size:0.72rem; text-align:center; padding:0.6rem; border:1px solid rgba(255,215,0,0.25); border-radius:6px; margin:0.5rem 0; letter-spacing:1px; }
+  footer { text-align:center; padding:1.5rem 1rem; font-size:0.75rem; color:rgba(200,220,255,0.25); letter-spacing:1px; }
+  footer span{color:var(--gold-dim);}
+  ::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-track{background:#020408;} ::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="back-btn">← Back</a>
+  <div class="tag">Niels Bohr · 1913</div>
+  <h1>Bohr's Atomic Model</h1>
+  <p class="sub">3D Interactive Simulation · Quantized Electron Orbits & Photon Emission</p>
+</header>
+
+<div id="three-wrap">
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+  <div id="jump-label">QUANTUM JUMP DETECTED</div>
+  <div id="hint">DRAG TO ROTATE · SCROLL TO ZOOM · CLICK SHELL BUTTONS TO EXCITE ELECTRON</div>
+</div>
+
+<div id="controls">
+  <button class="btn active" id="btn-play" onclick="togglePlay()">⏸ PAUSE</button>
+  <button class="btn" onclick="resetSim()">↺ RESET</button>
+  <button class="btn accent" id="btn-cam" onclick="cycleCam()">◈ SIDE VIEW</button>
+  <button class="btn" id="btn-photon" onclick="triggerJump()">⚡ EXCITE ELECTRON</button>
+  <button class="btn red" id="btn-hydrogen" onclick="setElement('H')">H HYDROGEN</button>
+  <button class="btn" id="btn-helium" onclick="setElement('He')">He HELIUM</button>
+  <div id="speed-wrap">
+    SPEED
+    <input type="range" id="speed-slider" min="0.2" max="3" step="0.1" value="1" oninput="setSpeed(this.value)">
+    <span id="speed-val">1.0×</span>
+  </div>
+</div>
+
+<div id="shell-selector">
+  <span class="shell-label">EXCITE TO SHELL →</span>
+  <button class="shell-btn sel" id="shell-1" onclick="selectShell(1)">n=1 (K)</button>
+  <button class="shell-btn" id="shell-2" onclick="selectShell(2)">n=2 (L)</button>
+  <button class="shell-btn" id="shell-3" onclick="selectShell(3)">n=3 (M)</button>
+  <button class="shell-btn" id="shell-4" onclick="selectShell(4)">n=4 (N)</button>
+  <button class="shell-btn" id="shell-5" onclick="selectShell(5)">n=5 (O)</button>
+</div>
+
+<div id="live-stats">
+  <div class="live-item"><span class="lval gold" id="stat-shell">1</span><span class="llabel">Current Shell (n)</span></div>
+  <div class="live-item"><span class="lval blue" id="stat-energy">-13.6 eV</span><span class="llabel">Energy Level</span></div>
+  <div class="live-item"><span class="lval red" id="stat-jumps">0</span><span class="llabel">Quantum Jumps</span></div>
+  <div class="live-item"><span class="lval green" id="stat-photons">0</span><span class="llabel">Photons Emitted</span></div>
+</div>
+
+<div id="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:#ff4400"></div>Nucleus (Protons+Neutrons)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#4488ff"></div>Electron</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#ffd700;opacity:0.7"></div>Orbit Shell</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#ffff44"></div>Photon (Emitted)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#00cfff"></div>Absorbed Photon (Excitation)</div>
+</div>
+
+<div id="info-grid">
+  <div class="panel">
+    <h3>Hydrogen Atom Data</h3>
+    <div class="stat-row"><span class="label">Atomic Number</span><span class="val">Z = 1</span></div>
+    <div class="stat-row"><span class="label">Shell n=1 Energy</span><span class="val">-13.6 eV</span></div>
+    <div class="stat-row"><span class="label">Shell n=2 Energy</span><span class="val">-3.4 eV</span></div>
+    <div class="stat-row"><span class="label">Shell n=3 Energy</span><span class="val">-1.51 eV</span></div>
+    <div class="stat-row"><span class="label">Shell n=4 Energy</span><span class="val">-0.85 eV</span></div>
+    <div class="stat-row"><span class="label">Shell n=5 Energy</span><span class="val">-0.54 eV</span></div>
+    <div class="stat-row"><span class="label">Ionisation Energy</span><span class="val">13.6 eV</span></div>
+  </div>
+  <div class="panel">
+    <h3>Bohr's Postulates</h3>
+    <p>Electrons revolve in <strong>fixed circular orbits</strong> (stationary states) without radiating energy. Each orbit has a <strong>quantized angular momentum</strong>: mvr = nh/2π. Energy is only emitted or absorbed when an electron <strong>jumps between shells</strong>, releasing a photon of energy <em>E = hν = E₂ − E₁</em>.</p>
+  </div>
+</div>
+
+<div id="theory">
+  <h2>⚗ Complete Theory & Explanation</h2>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Before Bohr — Rutherford's Limitation (1911)<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <p>Rutherford's nuclear model (1911) proved the atom had a dense nucleus at its center with electrons orbiting far away. However, it had a <strong>fatal flaw</strong>: according to classical electrodynamics, an electron orbiting a nucleus would continuously radiate energy (as electromagnetic waves), spiral inward, and crash into the nucleus within ~10⁻¹⁰ seconds.</p>
+      <p style="margin-top:0.6rem">Rutherford's model also could not explain the <strong>discrete line spectrum</strong> of hydrogen — why hydrogen emitted only specific colors of light (e.g., the Balmer series in the visible range) and not a continuous spectrum.</p>
+      <p style="margin-top:0.6rem">Niels Bohr solved both problems in 1913 by introducing <strong>quantum conditions</strong> into the atomic model.</p>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Bohr's Three Postulates (1913)<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>Postulate 1 — Stationary Orbits:</strong> Electrons revolve around the nucleus in certain fixed circular orbits called <em>stationary states</em> or <em>allowed orbits</em>. While in these orbits, electrons do NOT emit radiation — they have constant energy.</li>
+        <li><strong>Postulate 2 — Quantized Angular Momentum:</strong> Only those orbits are permitted where the angular momentum (L) of the electron is an integral multiple of h/2π:
+          <div class="formula-box">mvr = nh / 2π &nbsp;&nbsp; (n = 1, 2, 3, ...)</div>
+          Here m = electron mass, v = speed, r = orbit radius, h = Planck's constant, n = principal quantum number (shell number).
+        </li>
+        <li><strong>Postulate 3 — Quantum Jumps & Photon Emission:</strong> When an electron jumps from a higher energy orbit (n₂) to a lower energy orbit (n₁), it emits a photon of energy:
+          <div class="formula-box">E = hν = E₂ − E₁</div>
+          When it absorbs a photon of the exact same energy, it jumps upward (excitation).
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Derivation — Bohr's Radius & Energy Formula<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <p>Combining Coulomb's attraction with centripetal force and the quantization condition, Bohr derived:</p>
+      <div class="formula-box">rₙ = n² × a₀ &nbsp;&nbsp; where a₀ = 0.529 Å (Bohr Radius)</div>
+      <ul style="margin-top:0.7rem">
+        <li><strong>n=1:</strong> r₁ = 0.529 Å — ground state, smallest orbit</li>
+        <li><strong>n=2:</strong> r₂ = 2.116 Å — 4× larger than ground state</li>
+        <li><strong>n=3:</strong> r₃ = 4.761 Å — 9× larger</li>
+      </ul>
+      <p style="margin-top:0.7rem">The energy of each orbit is:</p>
+      <div class="formula-box">Eₙ = −13.6 / n² &nbsp; eV</div>
+      <ul style="margin-top:0.5rem">
+        <li>Negative sign means the electron is <strong>bound</strong> to the nucleus.</li>
+        <li>Higher n → less negative energy → electron is farther from nucleus and loosely bound.</li>
+        <li>n = ∞ means the electron is <strong>ionized</strong> (free); ionisation energy = 13.6 eV for hydrogen.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Spectral Lines — Hydrogen Emission Series<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <p>When electrons fall from higher shells to specific lower shells, they emit photons whose wavelengths form distinct <strong>spectral series</strong> named after their discoverers:</p>
+      <ul style="margin-top:0.6rem">
+        <li><strong>Lyman Series (n→1):</strong> Ultraviolet region. Most energetic transitions.</li>
+        <li><strong>Balmer Series (n→2):</strong> Visible light region. The famous red (Hα, 656 nm), cyan (Hβ, 486 nm) lines.</li>
+        <li><strong>Paschen Series (n→3):</strong> Infrared region.</li>
+        <li><strong>Brackett Series (n→4):</strong> Far infrared.</li>
+        <li><strong>Pfund Series (n→5):</strong> Far infrared.</li>
+      </ul>
+      <p style="margin-top:0.6rem">The wavelength formula (Rydberg equation):
+        <div class="formula-box">1/λ = R∞ (1/n₁² − 1/n₂²)</div>
+        R∞ = 1.097 × 10⁷ m⁻¹ (Rydberg constant)
+      </p>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Successes of the Bohr Model<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li>Accurately predicted the <strong>line spectrum of hydrogen</strong> and hydrogen-like ions (He⁺, Li²⁺).</li>
+        <li>Calculated the <strong>ionisation energy</strong> of hydrogen as 13.6 eV — in perfect agreement with experiment.</li>
+        <li>Explained why atoms are <strong>stable</strong> (electrons don't spiral in because they occupy quantized orbits).</li>
+        <li>Introduced the concept of <strong>principal quantum number n</strong>, which became fundamental to quantum mechanics.</li>
+        <li>Explained the <strong>origin of spectral lines</strong>: each line corresponds to an electron transition between two specific shells.</li>
+        <li>Successfully reproduced the experimentally known <strong>Rydberg constant</strong> from first principles.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Limitations of the Bohr Model<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li>Could not explain the <strong>spectra of multi-electron atoms</strong> (helium, lithium, etc.).</li>
+        <li>Could not explain the <strong>fine structure</strong> (splitting of spectral lines in magnetic fields — Zeeman effect).</li>
+        <li>Assumed circular orbits, but electrons actually exist in <strong>probability clouds</strong> (orbitals), not fixed paths.</li>
+        <li>Violated the <strong>Heisenberg Uncertainty Principle</strong> — you cannot simultaneously know an electron's exact position and momentum.</li>
+        <li>Could not explain <strong>chemical bonding</strong> or the intensities of spectral lines.</li>
+        <li>Eventually replaced by the <strong>Quantum Mechanical Model</strong> (Schrödinger, 1926) which uses wave functions (ψ) to describe electrons.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Bohr vs Rutherford — Quick Comparison<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>Rutherford (1911):</strong> Nucleus exists; electrons orbit freely like planets. No quantization. Unstable (predicts electron spiraling).</li>
+        <li><strong>Bohr (1913):</strong> Added quantum rules — only specific orbits allowed; electrons stable in orbits; energy emitted/absorbed only during jumps.</li>
+        <li><strong>Key addition:</strong> Bohr used Planck's quantum theory (E=hν) and applied it to atomic structure for the first time.</li>
+        <li><strong>Legacy:</strong> Bohr's model was a bridge between classical physics and modern quantum mechanics, earning him the <em>Nobel Prize in Physics in 1922</em>.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>3D-CHEMISTRY LAB</span> · Bohr's Atomic Model — 3D Interactive Simulation · Class XI · © 2025 · All Rights Reserved
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ═══════════ PROTECTION ═══════════ */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12') e.preventDefault();
+  if (e.ctrlKey && ['u','s','c','a'].includes(e.key.toLowerCase())) e.preventDefault();
+});
+
+/* ═══════════ STATE ═══════════ */
+let playing = true;
+let simSpeed = 1.0;
+let camMode = 0; // 0=side, 1=top, 2=front, 3=perspective
+let currentShell = 1;
+let targetShell = 1;
+let jumpCount = 0;
+let photonCount = 0;
+let currentElement = 'H'; // H or He
+let isDragging = false, lastMouse = {x:0,y:0};
+let camTheta = 0.8, camPhi = 1.1, camRadius = 18;
+let targetTheta = 0.8, targetPhi = 1.1, targetRadius = 18;
+let animatingCam = false, animCamPos = null, animCamTarget = null, animCamT = 0;
+const camTarget = new THREE.Vector3(0,0,0);
+
+const SHELLS = [
+  null,
+  { n:1, r:2.2,  energy:-13.6,  color:0xffd700, name:'K', maxE:2  },
+  { n:2, r:4.4,  energy:-3.4,   color:0x00cfff, name:'L', maxE:8  },
+  { n:3, r:6.6,  energy:-1.51,  color:0xff8844, name:'M', maxE:18 },
+  { n:4, r:8.8,  energy:-0.85,  color:0x44ff88, name:'N', maxE:32 },
+  { n:5, r:11.0, energy:-0.544, color:0xff44cc, name:'O', maxE:50 }
+];
+
+/* ═══════════ RENDERER ═══════════ */
+const wrap = document.getElementById('three-wrap');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+wrap.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x020408);
+scene.fog = new THREE.FogExp2(0x020408, 0.012);
+
+const camera = new THREE.PerspectiveCamera(55, 16/9, 0.1, 300);
+camera.position.set(0, 8, 22);
+camera.lookAt(0,0,0);
+
+function resizeRenderer() {
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resizeRenderer();
+window.addEventListener('resize', resizeRenderer);
+
+/* ═══════════ LIGHTING ═══════════ */
+scene.add(new THREE.AmbientLight(0x112244, 1.2));
+const dirLight = new THREE.DirectionalLight(0xffd0a0, 1.5);
+dirLight.position.set(10, 20, 10);
+scene.add(dirLight);
+const pointLightNucleus = new THREE.PointLight(0xff4400, 2.5, 20);
+pointLightNucleus.position.set(0,0,0);
+scene.add(pointLightNucleus);
+const pointLightBlue = new THREE.PointLight(0x00cfff, 1.5, 35);
+pointLightBlue.position.set(-10, 5, 10);
+scene.add(pointLightBlue);
+
+/* ═══════════ STARFIELD ═══════════ */
+const starVerts = [];
+for (let i=0; i<1500; i++) {
+  starVerts.push((Math.random()-0.5)*250, (Math.random()-0.5)*250, (Math.random()-0.5)*250);
+}
+const starGeo = new THREE.BufferGeometry();
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVerts,3));
+scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xaabbff, size:0.16, transparent:true, opacity:0.65})));
+
+/* ═══════════ NUCLEUS ═══════════ */
+const nucleusGroup = new THREE.Group();
+scene.add(nucleusGroup);
+
+function buildNucleus(protons) {
+  while (nucleusGroup.children.length) nucleusGroup.remove(nucleusGroup.children[0]);
+  const baseR = 0.35;
+  const protonMat = new THREE.MeshPhongMaterial({color:0xff4400, emissive:0x991100, shininess:120});
+  const neutronMat = new THREE.MeshPhongMaterial({color:0x888899, emissive:0x222233, shininess:80});
+  const nucleonGeo = new THREE.SphereGeometry(baseR, 14, 14);
+
+  // Place protons + neutrons roughly packed
+  const nucleons = protons + Math.round(protons * 1.1); // rough neutron count
+  for (let i=0; i<Math.min(nucleons, 8); i++) {
+    const mesh = new THREE.Mesh(nucleonGeo, i < protons ? protonMat : neutronMat);
+    const theta = (i / Math.min(nucleons,8)) * Math.PI * 2;
+    const phi = Math.acos(2 * (i / Math.max(nucleons-1,1)) - 1);
+    const r = baseR * 1.6;
+    mesh.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+    nucleusGroup.add(mesh);
+  }
+
+  // Nucleus glow
+  const glowMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(1.1, 20, 20),
+    new THREE.MeshBasicMaterial({color:0xff4400, transparent:true, opacity:0.12, side:THREE.BackSide})
+  );
+  nucleusGroup.add(glowMesh);
+
+  const glowMesh2 = new THREE.Mesh(
+    new THREE.SphereGeometry(1.6, 20, 20),
+    new THREE.MeshBasicMaterial({color:0xff6600, transparent:true, opacity:0.05, side:THREE.BackSide})
+  );
+  nucleusGroup.add(glowMesh2);
+}
+
+buildNucleus(1);
+
+/* ═══════════ ORBIT RINGS ═══════════ */
+const orbitRingMeshes = [];
+function buildOrbitRings() {
+  orbitRingMeshes.forEach(m => scene.remove(m));
+  orbitRingMeshes.length = 0;
+
+  for (let n=1; n<=5; n++) {
+    const shell = SHELLS[n];
+    const geo = new THREE.TorusGeometry(shell.r, 0.025, 8, 120);
+    const mat = new THREE.MeshBasicMaterial({
+      color: shell.color, transparent:true,
+      opacity: n === currentShell ? 0.55 : 0.18
+    });
+    const ring = new THREE.Mesh(geo, mat);
+    ring.userData.shellN = n;
+    scene.add(ring);
+    orbitRingMeshes.push(ring);
+
+    // Shell label (small dot/marker at 0 angle)
+    const markerGeo = new THREE.SphereGeometry(0.12, 8, 8);
+    const markerMat = new THREE.MeshBasicMaterial({color:shell.color, transparent:true, opacity:0.6});
+    const marker = new THREE.Mesh(markerGeo, markerMat);
+    marker.position.set(shell.r, 0, 0);
+    scene.add(marker);
+  }
+}
+buildOrbitRings();
+
+function updateOrbitRingOpacities() {
+  orbitRingMeshes.forEach(ring => {
+    ring.material.opacity = ring.userData.shellN === currentShell ? 0.6 : 0.18;
+  });
+}
+
+/* ═══════════ ELECTRONS ═══════════ */
+const electronObjects = []; // {mesh, glow, angle, speed, shellN, axis}
+
+const eGeo = new THREE.SphereGeometry(0.22, 12, 12);
+const eMat = new THREE.MeshPhongMaterial({color:0x4488ff, emissive:0x1133aa, shininess:200});
+const eGlowGeo = new THREE.SphereGeometry(0.44, 12, 12);
+const eGlowMat = new THREE.MeshBasicMaterial({color:0x00aaff, transparent:true, opacity:0.25, side:THREE.BackSide});
+
+function makeElectron(shellN, angleOffset) {
+  const shell = SHELLS[shellN];
+  const mesh = new THREE.Mesh(eGeo, eMat.clone());
+  const glow = new THREE.Mesh(eGlowGeo, eGlowMat.clone());
+  mesh.add(glow);
+  mesh.position.set(shell.r, 0, 0);
+  scene.add(mesh);
+  const speed = 0.012 / (shellN * shellN); // slower at higher shells
+  return { mesh, shellN, angle: angleOffset || 0, speed };
+}
+
+function buildElectrons() {
+  electronObjects.forEach(e => scene.remove(e.mesh));
+  electronObjects.length = 0;
+  const protons = currentElement === 'H' ? 1 : 2;
+  if (currentElement === 'H') {
+    electronObjects.push(makeElectron(currentShell, 0));
+  } else {
+    electronObjects.push(makeElectron(1, 0));
+    electronObjects.push(makeElectron(1, Math.PI));
+  }
+}
+buildElectrons();
+
+/* ═══════════ PHOTON PARTICLES ═══════════ */
+const photons = [];
+const photonGeo = new THREE.SphereGeometry(0.18, 8, 8);
+
+function spawnPhoton(fromR, toR, type) {
+  // type: 'emit' (yellow, outward) or 'absorb' (cyan, inward)
+  const color = type === 'emit' ? 0xffff44 : 0x00cfff;
+  const mat = new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.9});
+  const mesh = new THREE.Mesh(photonGeo, mat);
+
+  // Random direction on XZ plane
+  const angle = Math.random() * Math.PI * 2;
+  const startR = type === 'emit' ? fromR : toR + 5;
+  const endR = type === 'emit' ? fromR + 8 : toR;
+  mesh.position.set(Math.cos(angle)*startR, (Math.random()-0.5)*2, Math.sin(angle)*startR);
+
+  // Glow trail
+  const glowG = new THREE.SphereGeometry(0.36, 8, 8);
+  const glowM = new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.22, side:THREE.BackSide});
+  const glow = new THREE.Mesh(glowG, glowM);
+  mesh.add(glow);
+  scene.add(mesh);
+
+  const dir = new THREE.Vector3(Math.cos(angle), (Math.random()-0.5)*0.3, Math.sin(angle));
+  dir.normalize();
+
+  photons.push({ mesh, dir, type, life:1.0 });
+}
+
+function spawnMultiplePhotons(fromR, toR, type, count) {
+  for (let i=0; i<count; i++) spawnPhoton(fromR, toR, type);
+}
+
+/* ═══════════ JUMP LOGIC ═══════════ */
+let jumpCooldown = 0;
+let isJumping = false;
+
+function triggerJump() {
+  if (isJumping) return;
+  // Move electron to targetShell
+  const from = currentShell;
+  const to = targetShell;
+  if (from === to) {
+    // Move to a random higher shell
+    const newShell = Math.min(5, from + 1 + Math.floor(Math.random()*2));
+    selectShell(newShell);
+    return;
+  }
+  isJumping = true;
+  jumpCount++;
+  document.getElementById('stat-jumps').textContent = jumpCount;
+  const jumpLabel = document.getElementById('jump-label');
+  jumpLabel.classList.add('visible');
+
+  const type = to > from ? 'absorb' : 'emit';
+  if (type === 'emit') {
+    photonCount++;
+    document.getElementById('stat-photons').textContent = photonCount;
+  }
+  spawnMultiplePhotons(SHELLS[from].r, SHELLS[to].r, type, 6);
+
+  // Move electron
+  currentShell = to;
+  updateOrbitRingOpacities();
+  electronObjects.forEach(e => { if (currentElement === 'H') e.shellN = currentShell; });
+  document.getElementById('stat-shell').textContent = currentShell;
+  document.getElementById('stat-energy').textContent = SHELLS[currentShell].energy.toFixed(2) + ' eV';
+
+  setTimeout(() => {
+    jumpLabel.classList.remove('visible');
+    isJumping = false;
+  }, 1800);
+}
+
+// Auto de-excite: after a random delay, electron falls back
+let autoDecayTimer = 0;
+
+/* ═══════════ ELEMENT SWITCH ═══════════ */
+function setElement(el) {
+  currentElement = el;
+  currentShell = 1;
+  targetShell = 1;
+  document.getElementById('stat-shell').textContent = 1;
+  document.getElementById('stat-energy').textContent = SHELLS[1].energy.toFixed(2)+' eV';
+  document.getElementById('btn-hydrogen').classList.toggle('active', el==='H');
+  document.getElementById('btn-helium').classList.toggle('active', el==='He');
+  buildNucleus(el === 'H' ? 1 : 2);
+  buildElectrons();
+  updateOrbitRingOpacities();
+}
+
+/* ═══════════ CAMERA PRESETS ═══════════ */
+const camPresets = [
+  { name:'SIDE VIEW',    pos: new THREE.Vector3(0, 6, 22),   target: new THREE.Vector3(0,0,0) },
+  { name:'TOP VIEW',     pos: new THREE.Vector3(0, 25, 0.1), target: new THREE.Vector3(0,0,0) },
+  { name:'FRONT VIEW',   pos: new THREE.Vector3(22, 0, 0),   target: new THREE.Vector3(0,0,0) },
+  { name:'PERSPECTIVE',  pos: new THREE.Vector3(14, 12, 14), target: new THREE.Vector3(0,0,0) }
+];
+function gsapCamTo(pos, tgt) {
+  animCamPos = pos.clone(); animCamTarget = tgt.clone();
+  animCamT = 0; animatingCam = true;
+}
+function cycleCam() {
+  camMode = (camMode + 1) % camPresets.length;
+  const preset = camPresets[camMode];
+  gsapCamTo(preset.pos, preset.target);
+  document.getElementById('btn-cam').textContent = '◈ ' + camPresets[(camMode+1)%camPresets.length].name;
+}
+
+/* ═══════════ SHELL SELECTOR ═══════════ */
+function selectShell(n) {
+  targetShell = n;
+  document.querySelectorAll('.shell-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('shell-'+n).classList.add('sel');
+}
+
+/* ═══════════ DRAG & ZOOM ═══════════ */
+wrap.addEventListener('mousedown', e => { isDragging=true; lastMouse={x:e.clientX,y:e.clientY}; animatingCam=false; });
+wrap.addEventListener('mouseup', () => isDragging=false);
+wrap.addEventListener('mouseleave', () => isDragging=false);
+wrap.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - lastMouse.x, dy = e.clientY - lastMouse.y;
+  targetTheta -= dx * 0.012;
+  targetPhi = Math.max(0.05, Math.min(Math.PI*0.48, targetPhi + dy * 0.01));
+  lastMouse = {x:e.clientX, y:e.clientY};
+});
+wrap.addEventListener('wheel', e => {
+  targetRadius = Math.max(8, Math.min(50, targetRadius + e.deltaY * 0.04));
+  e.preventDefault();
+}, {passive:false});
+wrap.addEventListener('touchstart', e => { isDragging=true; lastMouse={x:e.touches[0].clientX,y:e.touches[0].clientY}; });
+wrap.addEventListener('touchend', () => isDragging=false);
+wrap.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  const dx = e.touches[0].clientX - lastMouse.x, dy = e.touches[0].clientY - lastMouse.y;
+  targetTheta -= dx * 0.012; targetPhi = Math.max(0.05,Math.min(Math.PI*0.48,targetPhi+dy*0.01));
+  lastMouse={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  e.preventDefault();
+},{passive:false});
+
+/* ═══════════ CONTROLS ═══════════ */
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('btn-play').textContent = playing ? '⏸ PAUSE' : '▶ PLAY';
+  document.getElementById('btn-play').classList.toggle('active', playing);
+}
+function setSpeed(val) {
+  simSpeed = parseFloat(val);
+  document.getElementById('speed-val').textContent = simSpeed.toFixed(1)+'×';
+}
+function resetSim() {
+  currentShell = 1; targetShell = 1;
+  jumpCount = 0; photonCount = 0;
+  document.getElementById('stat-jumps').textContent = 0;
+  document.getElementById('stat-photons').textContent = 0;
+  document.getElementById('stat-shell').textContent = 1;
+  document.getElementById('stat-energy').textContent = '-13.6 eV';
+  photons.forEach(p => scene.remove(p.mesh));
+  photons.length = 0;
+  buildElectrons();
+  updateOrbitRingOpacities();
+  selectShell(1);
+}
+
+/* ═══════════ ANIMATION LOOP ═══════════ */
+let autoJumpTimer = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  const t = Date.now() * 0.001;
+
+  // Camera
+  if (animatingCam && animCamPos) {
+    animCamT += 0.04;
+    const ease = 1 - Math.pow(1 - Math.min(animCamT,1), 3);
+    camera.position.lerpVectors(camera.position, animCamPos, ease*0.12);
+    camTarget.lerpVectors(camTarget, animCamTarget, ease*0.12);
+    camera.lookAt(camTarget);
+    if (animCamT > 1.5) animatingCam = false;
+  } else if (!isDragging) {
+    camTheta += (targetTheta - camTheta) * 0.08;
+    camPhi += (targetPhi - camPhi) * 0.08;
+    camRadius += (targetRadius - camRadius) * 0.08;
+    camera.position.set(
+      camRadius * Math.sin(camPhi) * Math.sin(camTheta),
+      camRadius * Math.cos(camPhi),
+      camRadius * Math.sin(camPhi) * Math.cos(camTheta)
+    );
+    camera.lookAt(camTarget);
+  }
+
+  // Nucleus pulse
+  if (nucleusGroup.children.length > 0) {
+    const scale = 1 + Math.sin(t * 2.8) * 0.04;
+    nucleusGroup.scale.setScalar(scale);
+    nucleusGroup.rotation.y += 0.005 * (playing ? simSpeed : 0);
+  }
+
+  // Electrons orbit
+  if (playing) {
+    electronObjects.forEach((e, i) => {
+      const shell = SHELLS[e.shellN];
+      const baseSpeed = 0.025 / (e.shellN * e.shellN);
+      e.angle += baseSpeed * simSpeed * 60 * (1/60); // ~per frame
+      const offsetAngle = i * Math.PI; // opposite side for He
+      e.mesh.position.set(
+        Math.cos(e.angle + offsetAngle) * shell.r,
+        Math.sin(e.angle * 0.18 + i * 1.2) * shell.r * 0.15,
+        Math.sin(e.angle + offsetAngle) * shell.r
+      );
+      // Electron glow pulse
+      const glowScale = 1 + Math.sin(t * 3 + i) * 0.2;
+      if (e.mesh.children[0]) e.mesh.children[0].scale.setScalar(glowScale);
+    });
+
+    // Auto-excite timer (for demo mode)
+    autoJumpTimer += simSpeed * 0.008;
+    if (autoJumpTimer > 1 && !isJumping && currentShell === 1) {
+      autoJumpTimer = 0;
+      // Randomly excite to shell 2–4
+      const randShell = 2 + Math.floor(Math.random()*3);
+      selectShell(randShell);
+      triggerJump();
+    } else if (autoJumpTimer > 0.6 && !isJumping && currentShell > 1) {
+      // Fall back to ground state
+      autoJumpTimer = 0;
+      selectShell(1);
+      triggerJump();
+    }
+  }
+
+  // Update photons
+  for (let i = photons.length - 1; i >= 0; i--) {
+    const p = photons[i];
+    p.mesh.position.addScaledVector(p.dir, 0.18 * simSpeed);
+    p.life -= 0.018 * simSpeed;
+    p.mesh.material.opacity = Math.max(0, p.life);
+    if (p.mesh.children[0]) p.mesh.children[0].material.opacity = Math.max(0, p.life * 0.3);
+    // Wobble
+    p.mesh.position.y += Math.sin(Date.now()*0.005 + i) * 0.008;
+    if (p.life <= 0) {
+      scene.remove(p.mesh);
+      photons.splice(i, 1);
+    }
+  }
+
+  // Orbit ring gentle glow pulse
+  orbitRingMeshes.forEach((ring, idx) => {
+    if (ring.userData.shellN === currentShell) {
+      ring.material.opacity = 0.45 + Math.sin(t * 2.5) * 0.15;
+    }
+  });
+
+  renderer.render(scene, camera);
+}
+animate();
+
+/* ═══════════ ACCORDION ═══════════ */
+function toggleAcc(head) {
+  const body = head.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.acc-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.acc-head').forEach(h => h.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); head.classList.add('open'); }
+}
+</script>
+</body>
+</html>
