@@ -44,8 +44,8 @@ body{background:#070b1a;font-family:'Segoe UI',system-ui,sans-serif;color:#e8eaf
 .btn-pro{background:linear-gradient(135deg,#7a4a00,#c87a00);color:#ffe0a0;border:none;}
 .btn-disabled{background:rgba(30,45,85,0.5);color:#3a5a7a;border:1px solid #1e2d55;cursor:not-allowed;pointer-events:none;}
 
-/* ===== RAIN CONTROLS — top right ===== */
-#rainPanel{position:fixed;top:12px;right:12px;z-index:9000;}
+/* ===== RAIN CONTROLS — below app panel ===== */
+#rainPanel{position:fixed;top:52px;right:12px;z-index:9000;}
 #rainToggleBtn{display:flex;align-items:center;gap:6px;background:rgba(8,14,35,0.92);border:1px solid #1e2d55;border-radius:10px;padding:7px 12px;cursor:pointer;font-size:11px;color:#7aaaf5;backdrop-filter:blur(8px);transition:all 0.2s;white-space:nowrap;margin-left:auto;width:fit-content;}
 #rainToggleBtn:hover{border-color:#3a5aad;color:#a8c8ff;}
 #rainControls{background:rgba(8,14,35,0.95);border:1px solid #1e2d55;border-radius:12px;padding:12px 14px;min-width:210px;backdrop-filter:blur(8px);margin-top:6px;transition:opacity 0.25s,transform 0.25s;transform-origin:top right;}
@@ -106,6 +106,33 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .tg-btn-join:hover{opacity:0.88;transform:scale(0.98);}
 .tg-btn-cancel{display:block;width:100%;padding:10px;background:transparent;color:#3a5a7a;border:1px solid #1e2d55;border-radius:13px;font-size:13px;cursor:pointer;transition:all 0.2s;}
 .tg-btn-cancel:hover{border-color:#3a5aad;color:#7aaaf5;}
+
+/* ===== APK POPUP ===== */
+#apkPopup{display:none;position:fixed;inset:0;z-index:10000;background:rgba(2,5,18,0.87);align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+#apkPopup.show{display:flex;}
+.apk-box{background:linear-gradient(145deg,#0d1530,#070b1a);border:1px solid #2a4080;border-radius:22px;padding:2.4rem 2.8rem;text-align:center;max-width:380px;width:90%;box-shadow:0 0 80px rgba(74,122,255,0.15),0 0 30px rgba(74,255,154,0.08);}
+.apk-icon{font-size:52px;margin-bottom:12px;}
+.apk-title{font-size:22px;font-weight:700;color:#c8d8ff;margin-bottom:8px;letter-spacing:0.5px;}
+.apk-sub{font-size:13px;color:#4a6a9a;margin-bottom:10px;line-height:1.7;}
+.apk-safety{font-size:11px;color:#4aff9a;margin-bottom:20px;font-weight:600;letter-spacing:0.5px;background:rgba(74,255,154,0.07);border:1px solid rgba(74,255,154,0.2);border-radius:8px;padding:6px 12px;display:inline-block;}
+.apk-btn-dl{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#1a8a3a,#2acd5a);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;margin-bottom:10px;transition:opacity 0.2s,transform 0.15s;letter-spacing:0.3px;}
+.apk-btn-dl:hover{opacity:0.88;transform:scale(0.98);}
+.apk-btn-cancel{display:block;width:100%;padding:10px;background:transparent;color:#3a5a7a;border:1px solid #1e2d55;border-radius:13px;font-size:13px;cursor:pointer;transition:all 0.2s;}
+.apk-btn-cancel:hover{border-color:#3a5aad;color:#7aaaf5;}
+
+/* ===== APP PANEL — top right (above rain) ===== */
+#appPanel{position:fixed;top:12px;right:12px;z-index:9100;}
+#appPanelBtn{display:flex;align-items:center;gap:6px;background:rgba(8,14,35,0.92);border:1px solid rgba(74,255,154,0.35);border-radius:10px;padding:7px 12px;cursor:pointer;font-size:11px;color:#4aff9a;backdrop-filter:blur(8px);transition:all 0.2s;white-space:nowrap;width:fit-content;font-weight:600;}
+#appPanelBtn:hover{border-color:#4aff9a;color:#80ffb8;box-shadow:0 0 12px rgba(74,255,154,0.15);}
+#appPanelContent{background:rgba(8,14,35,0.97);border:1px solid rgba(74,255,154,0.2);border-radius:14px;padding:14px 16px;min-width:200px;backdrop-filter:blur(10px);margin-top:6px;transform-origin:top right;}
+#appPanelContent.hidden{display:none;}
+.ap-title{font-size:9px;color:#3a5a7a;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid #1a2540;padding-bottom:7px;}
+.ap-app-icon{font-size:28px;text-align:center;margin-bottom:6px;}
+.ap-app-name{font-size:13px;font-weight:700;color:#c8d8ff;text-align:center;margin-bottom:4px;}
+.ap-app-ver{font-size:10px;color:#4a6a9a;text-align:center;margin-bottom:10px;}
+.ap-dl-btn{display:block;width:100%;padding:8px;background:linear-gradient(135deg,#1a8a3a,#2acd5a);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;transition:opacity 0.2s,transform 0.15s;margin-bottom:7px;}
+.ap-dl-btn:hover{opacity:0.88;transform:scale(0.98);}
+.ap-safety-tag{text-align:center;font-size:10px;color:#4aff9a;font-weight:600;letter-spacing:0.3px;background:rgba(74,255,154,0.07);border:1px solid rgba(74,255,154,0.18);border-radius:7px;padding:4px 8px;}
 
 /* ===== DEVELOPER FOOTER ===== */
 .dev-footer{
@@ -222,6 +249,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
       "Built with passion, dedicated to curious minds.<br>
       <em>Science belongs to everyone.</em>"
     </div>
+  </div>
+</div>
+
+<!-- ===== APK POPUP ===== -->
+<div id="apkPopup">
+  <div class="apk-box">
+    <div class="apk-icon">📱</div>
+    <div class="apk-title">Download Our App!</div>
+    <div class="apk-sub">3D Chemistry App ab aapke phone mein! Molecules explore karo, experiments dekho — kabhi bhi, kahin bhi. 🚀</div>
+    <div class="apk-safety">✅ 100% Free &amp; Safe &amp; Secure</div>
+    <a class="apk-btn-dl" href="app-release.apk" download id="apkJoinBtn">📥 Download APK</a>
+    <button class="apk-btn-cancel" id="apkCancelBtn">Maybe Later</button>
+  </div>
+</div>
+
+<!-- ===== APP PANEL top-right ===== -->
+<div id="appPanel">
+  <button id="appPanelBtn">📱 Download App ▾</button>
+  <div id="appPanelContent" class="hidden">
+    <div class="ap-title">📱 Mobile App</div>
+    <div class="ap-app-icon">⚗️</div>
+    <div class="ap-app-name">3D Chemistry</div>
+    <div class="ap-app-ver">Latest Version • Android APK</div>
+    <a class="ap-dl-btn" href="app-release.apk" download>📥 Download APK</a>
+    <div class="ap-safety-tag">✅ 100% Free &amp; Safe &amp; Secure</div>
   </div>
 </div>
 
@@ -426,6 +478,21 @@ setTimeout(function(){document.getElementById('tgPopup').classList.add('show');}
 document.getElementById('tgCancelBtn').onclick=function(){document.getElementById('tgPopup').classList.remove('show');};
 document.getElementById('tgJoinBtn').onclick=function(){document.getElementById('tgPopup').classList.remove('show');};
 document.getElementById('tgPopup').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+
+// APK Popup — after 5 seconds (after telegram closes)
+setTimeout(function(){document.getElementById('apkPopup').classList.add('show');},5000);
+document.getElementById('apkCancelBtn').onclick=function(){document.getElementById('apkPopup').classList.remove('show');};
+document.getElementById('apkJoinBtn').addEventListener('click',function(){document.getElementById('apkPopup').classList.remove('show');});
+document.getElementById('apkPopup').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+
+// App Panel toggle
+var appPanelOpen=false;
+document.getElementById('appPanelBtn').addEventListener('click',function(){
+  appPanelOpen=!appPanelOpen;
+  var panel=document.getElementById('appPanelContent');
+  if(appPanelOpen){panel.classList.remove('hidden');this.textContent='📱 Download App ▴';}
+  else{panel.classList.add('hidden');this.textContent='📱 Download App ▾';}
+});
 </script>
 </body>
 </html>
