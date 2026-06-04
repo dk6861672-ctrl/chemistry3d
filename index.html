@@ -62,6 +62,35 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .rc-hide-btn{width:100%;padding:5px;background:transparent;border:1px solid #1a2540;border-radius:8px;color:#3a5a7a;font-size:11px;cursor:pointer;transition:all 0.2s;margin-top:4px;}
 .rc-hide-btn:hover{border-color:#3a5aad;color:#7aaaf5;}
 
+/* ===== DEVELOPER PANEL — top left ===== */
+#devPanel{position:fixed;top:12px;left:12px;z-index:9000;}
+#devPanelBtn{display:flex;align-items:center;gap:6px;background:rgba(8,14,35,0.92);border:1px solid #1e2d55;border-radius:10px;padding:7px 12px;cursor:pointer;font-size:11px;color:#7aaaf5;backdrop-filter:blur(8px);transition:all 0.2s;white-space:nowrap;width:fit-content;}
+#devPanelBtn:hover{border-color:#3a5aad;color:#a8c8ff;}
+#devPanelContent{background:rgba(8,14,35,0.97);border:1px solid #1e2d55;border-radius:14px;padding:16px 18px;min-width:240px;backdrop-filter:blur(10px);margin-top:6px;transform-origin:top left;}
+#devPanelContent.hidden{display:none;}
+.dp-title{font-size:9px;color:#3a5a7a;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;border-bottom:1px solid #1a2540;padding-bottom:7px;}
+.dp-person{display:flex;align-items:center;gap:11px;margin-bottom:13px;}
+.dp-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#c8d8ff;flex-shrink:0;border:1px solid rgba(74,122,255,0.3);}
+.dp-avatar.main{background:linear-gradient(135deg,#1a3a8a,#2a5acd);}
+.dp-avatar.helper{background:linear-gradient(135deg,#6a1a8a,#a02acd);}
+.dp-pinfo{}
+.dp-role-tag{font-size:9px;color:#3a5a7a;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.dp-pname{font-size:13px;font-weight:700;background:linear-gradient(90deg,#7aaaf5,#229ED9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.3px;}
+.dp-pname.helper-name{background:linear-gradient(90deg,#c365d7,#9a40bb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.dp-slogan{font-size:10px;color:#4a6a9a;font-style:italic;margin-top:2px;}
+.dp-divider{height:1px;background:#1a2540;margin:3px 0 12px;}
+.dp-socials{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.dp-social-row{display:flex;gap:6px;}
+.dp-social-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:10px;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.2s;flex:1;justify-content:center;}
+.dp-social-btn.tg{background:rgba(34,158,217,0.12);border:1px solid rgba(34,158,217,0.3);color:#229ED9;}
+.dp-social-btn.tg:hover{background:rgba(34,158,217,0.22);transform:translateY(-1px);}
+.dp-social-btn.ig{background:rgba(195,101,215,0.12);border:1px solid rgba(195,101,215,0.3);color:#c365d7;}
+.dp-social-btn.ig:hover{background:rgba(195,101,215,0.22);transform:translateY(-1px);}
+.dp-social-btn.mail{background:rgba(74,255,154,0.1);border:1px solid rgba(74,255,154,0.25);color:#4aff9a;}
+.dp-social-btn.mail:hover{background:rgba(74,255,154,0.2);transform:translateY(-1px);}
+.dp-respect{text-align:center;margin-top:10px;padding:8px 10px;background:rgba(74,122,255,0.06);border:1px solid rgba(74,122,255,0.12);border-radius:10px;font-size:10px;color:#4a6a9a;font-style:italic;line-height:1.6;}
+.dp-respect span{color:#7aaaf5;font-weight:600;font-style:normal;}
+
 /* ===== COMING SOON OVERLAY ===== */
 .card-coming-soon{opacity:0.55;pointer-events:none;}
 .coming-label{position:absolute;top:14px;right:14px;font-size:10px;color:#3a5a7a;background:rgba(14,22,40,0.9);border:1px solid #1e2d55;border-radius:8px;padding:3px 9px;letter-spacing:1px;}
@@ -149,6 +178,52 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 <body>
 
 <canvas id="rainCanvas"></canvas>
+
+<!-- ===== DEVELOPER PANEL top-left ===== -->
+<div id="devPanel">
+  <button id="devPanelBtn">👨‍💻 Developers ▾</button>
+  <div id="devPanelContent" class="hidden">
+    <div class="dp-title">⚡ The Team Behind This</div>
+
+    <!-- Developer -->
+    <div class="dp-person">
+      <div class="dp-avatar main">DK</div>
+      <div class="dp-pinfo">
+        <div class="dp-role-tag">Developer</div>
+        <div class="dp-pname">Deepesh Kumar</div>
+        <div class="dp-slogan">Code is my chemistry 🧪</div>
+      </div>
+    </div>
+
+    <!-- Web Helper -->
+    <div class="dp-person">
+      <div class="dp-avatar helper">AB</div>
+      <div class="dp-pinfo">
+        <div class="dp-role-tag">Web Helper</div>
+        <div class="dp-pname helper-name">Anmol Bhardwaj</div>
+        <div class="dp-slogan">Ideas that shape the web ✨</div>
+      </div>
+    </div>
+
+    <div class="dp-divider"></div>
+
+    <!-- Social Links -->
+    <div class="dp-socials">
+      <div class="dp-social-row">
+        <a class="dp-social-btn tg" href="https://t.me/chmistry_3d" target="_blank">✈ Telegram</a>
+        <a class="dp-social-btn ig" href="https://www.instagram.com/3d._chemistry" target="_blank">📸 Instagram</a>
+      </div>
+      <a class="dp-social-btn mail" href="mailto:matherz734@gmail.com">✉ matherz734@gmail.com</a>
+    </div>
+
+    <!-- Respect + Slogan -->
+    <div class="dp-respect">
+      <span>🙏 With Respect & Gratitude</span><br>
+      "Built with passion, dedicated to curious minds.<br>
+      <em>Science belongs to everyone.</em>"
+    </div>
+  </div>
+</div>
 
 <!-- ===== RAIN PANEL top-right ===== -->
 <div id="rainPanel">
@@ -283,41 +358,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 
 </div>
 
-<!-- ===== DEVELOPER FOOTER ===== -->
-<div class="dev-footer">
-  <div class="dev-footer-inner">
-    <div class="dev-top-row">
-      <div class="dev-avatar">
-        DK
-        <div class="dev-avatar-ring"></div>
-      </div>
-      <div class="dev-info">
-        <div class="dev-label">Crafted with passion by</div>
-        <div class="dev-name"><span>Deepesh Kumar</span></div>
-        <div class="dev-role">⚗ Chemistry 3D Lab · Full Stack Developer</div>
-      </div>
-    </div>
-    <div class="dev-divider"></div>
-    <div class="dev-quote-wrap">
-      <div class="dev-quote-mark">"</div>
-      <div class="dev-quote">
-        Chemistry is not just a subject — it is the <em>secret language of the universe</em>.<br>
-        Every atom tells a story, every bond holds a relationship.<br>
-        <em>I build tools</em> so that language becomes visible to everyone.
-      </div>
-    </div>
-    <div class="dev-divider2"></div>
-    <div class="dev-bottom-row">
-      <div class="dev-tag">Chemistry 3D Lab v5.0 &nbsp;·&nbsp; Built with Three.js &nbsp;·&nbsp; © 2025 All Rights Reserved</div>
-      <div class="social-links">
-        <a class="social-btn telegram" href="https://t.me/chmistry_3d" target="_blank">✈ Telegram</a>
-        <a class="social-btn instagram" href="https://www.instagram.com/3d._chemistry" target="_blank">📸 Instagram</a>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <script>
+// Dev Panel toggle
+var devPanelOpen=false;
+document.getElementById('devPanelBtn').addEventListener('click',function(){
+  devPanelOpen=!devPanelOpen;
+  var panel=document.getElementById('devPanelContent');
+  if(devPanelOpen){panel.classList.remove('hidden');this.textContent='👨‍💻 Developers ▴';}
+  else{panel.classList.add('hidden');this.textContent='👨‍💻 Developers ▾';}
+});
+
 var drops=[];
 var rainCfg={enabled:true,speed:5,count:120,length:20,opacity:0.55};
 var rainCanvas=document.getElementById('rainCanvas');
