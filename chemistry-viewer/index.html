@@ -100,8 +100,68 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .atom-pill{display:flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:8px;border:1px solid #1a2a44;background:#0a1220;color:#6a8ab0;}
 .atom-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .no-results{text-align:center;padding:2rem;color:#3a4a6a;font-size:13px;}
+.vsepr-panel{margin-top:10px;padding:10px 14px;background:rgba(10,18,44,0.9);border:1px solid #1e3a6a;border-radius:12px;}
+.vsepr-title{font-size:10px;letter-spacing:1.5px;color:#3a6aaa;text-transform:uppercase;margin-bottom:8px;}
+.vsepr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.vsepr-cell{background:rgba(14,28,60,0.85);border:1px solid #1a2e55;border-radius:9px;padding:7px 8px;text-align:center;}
+.vsepr-cell-label{font-size:9px;color:#3a5a80;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3px;}
+.vsepr-cell-val{font-size:13px;font-weight:600;color:#7aaaf5;}
+.vsepr-tip{margin-top:7px;font-size:11px;color:#4a7aaa;padding:6px 10px;background:rgba(20,40,90,0.6);border-left:2px solid #2a5aaa;border-radius:0 6px 6px 0;}
+.vsepr-shape-badge{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600;background:#0a1e4a;color:#4a9aff;border:1px solid #1e3a7a;margin-bottom:6px;}
+.lp-dots{display:inline-flex;gap:4px;margin-left:6px;vertical-align:middle;}
+.lp-dot{width:8px;height:8px;border-radius:50%;background:#ffcc44;border:1px solid #cc9900;display:inline-block;}
 
-@media(max-width:640px){.modal-info{display:none;}}
+
+/* ===== PERIODIC TABLE ===== */
+.pt-section{margin:0 1rem 2rem;}
+.pt-folder-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(12,20,44,0.92);border:1px solid #1e2d55;border-radius:12px;cursor:pointer;transition:all 0.2s;user-select:none;}
+.pt-folder-btn:hover{border-color:#3a5aad;background:rgba(16,26,58,0.95);}
+.pt-folder-icon{font-size:18px;}
+.pt-folder-label{font-size:14px;font-weight:600;color:#c8d8ff;flex:1;}
+.pt-folder-sub{font-size:11px;color:#3a5a80;}
+.pt-chevron{font-size:11px;color:#3a5a80;transition:transform 0.3s;}
+.pt-chevron.open{transform:rotate(180deg);}
+.pt-body{display:none;padding:12px 0 0;}
+.pt-body.open{display:block;}
+.pt-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.pt-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#4a6a9a;}
+.pt-leg-dot{width:10px;height:10px;border-radius:3px;}
+.pt-grid{overflow-x:auto;padding-bottom:8px;}
+.pt-grid::-webkit-scrollbar{height:4px;}
+.pt-grid::-webkit-scrollbar-track{background:transparent;}
+.pt-grid::-webkit-scrollbar-thumb{background:#1e2d55;border-radius:4px;}
+.pt-table{border-collapse:separate;border-spacing:3px;min-width:740px;}
+.pt-cell{width:38px;height:38px;border-radius:6px;border:1px solid transparent;cursor:pointer;transition:all 0.15s;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;}
+.pt-cell:hover{transform:scale(1.18);z-index:10;border-color:#fff !important;}
+.pt-cell.selected-el{transform:scale(1.18);z-index:10;box-shadow:0 0 0 2px #4a9aff;}
+.pt-num{font-size:8px;line-height:1;opacity:0.7;}
+.pt-sym{font-size:13px;font-weight:700;line-height:1.1;}
+.pt-wt{font-size:7px;opacity:0.6;line-height:1;}
+.pt-empty{width:38px;height:38px;}
+.pt-gap-label{font-size:9px;color:#2a3a5a;text-align:center;padding:4px 0;}
+.pt-detail{margin-top:12px;border:1px solid #1e2d55;border-radius:12px;background:rgba(10,18,40,0.92);padding:14px 16px;min-height:80px;transition:all 0.3s;}
+.pt-detail-empty{color:#2a3a5a;font-size:12px;text-align:center;padding:16px 0;}
+.pt-detail-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;}
+.pt-detail-sym{font-size:48px;font-weight:700;line-height:1;grid-row:1/4;}
+/* 3D Atom Viewer */
+.pt-atom-viewer{margin-top:14px;border:1px solid #1a2d55;border-radius:12px;overflow:hidden;position:relative;background:#030710;}
+.pt-atom-canvas{width:100%;display:block;}
+.pt-atom-overlay{position:absolute;bottom:0;left:0;right:0;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;}
+.pt-atom-label{font-size:10px;color:rgba(80,130,220,0.5);letter-spacing:0.5px;}
+.pt-atom-btns{display:flex;gap:6px;pointer-events:all;}
+.pt-atom-btn{background:rgba(20,40,100,0.72);border:1px solid rgba(60,100,200,0.4);color:#7aaaf5;border-radius:16px;padding:4px 12px;font-size:10px;cursor:pointer;backdrop-filter:blur(4px);transition:all 0.2s;}
+.pt-atom-btn:hover{background:rgba(30,60,140,0.85);}
+.pt-shell-legend{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.pt-shell-pill{font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid #1a2d44;background:#080f20;color:#5a80aa;}
+.pt-detail-name{font-size:18px;font-weight:600;color:#c8d8ff;}
+.pt-detail-num{font-size:12px;color:#4a6aaa;margin-top:2px;}
+.pt-detail-cat{display:inline-block;font-size:10px;padding:2px 8px;border-radius:6px;margin-top:4px;}
+.pt-props{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.pt-prop{background:rgba(14,24,50,0.9);border:1px solid #1a2a44;border-radius:8px;padding:6px 10px;min-width:90px;}
+.pt-prop-label{font-size:9px;color:#3a5a7a;text-transform:uppercase;letter-spacing:0.5px;}
+.pt-prop-val{font-size:12px;font-weight:600;color:#7aaaf5;margin-top:2px;}
+.pt-config{margin-top:8px;font-size:11px;color:#4a6a9a;font-family:monospace;background:rgba(10,18,40,0.7);border-radius:6px;padding:5px 9px;letter-spacing:0.3px;}
+@media(max-width:640px){.modal-info{display:none;}.vsepr-grid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:480px){#suggestBox{width:calc(100vw - 24px);}#rainControls{min-width:180px;}}
 </style>
 </head>
@@ -170,6 +230,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
     </div>
   </div>
   <div class="mol-info-box" id="molInfo"></div>
+
+  <!-- PERIODIC TABLE SECTION -->
+  <div class="pt-section" id="ptSection">
+    <div class="pt-folder-btn" id="ptFolderBtn" onclick="togglePT()">
+      <span class="pt-folder-icon" id="ptFolderIcon">&#128193;</span>
+      <span class="pt-folder-label">Periodic Table</span>
+      <span class="pt-folder-sub">118 elements &nbsp;&#183;&nbsp; Click any element to explore</span>
+      <span class="pt-chevron" id="ptChevron">&#9660;</span>
+    </div>
+    <div class="pt-body" id="ptBody">
+      <div class="pt-legend" id="ptLegend"></div>
+      <div class="pt-grid"><table class="pt-table" id="ptTable"></table></div>
+      <div class="pt-detail" id="ptDetail"><div class="pt-detail-empty">Click any element to see details</div></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- FULLSCREEN MODAL -->
@@ -259,8 +335,8 @@ document.getElementById('rcEnabled').addEventListener('change',function(){rainCf
 syncRain();
 
 // ===== ATOM DATA =====
-var AC={H:'#e8e8ff',C:'#4a4a5a',N:'#4488ff',O:'#ff4444',S:'#ffdd00',P:'#ff8800',Cl:'#33dd33',F:'#aaffaa',Na:'#cc55ff',K:'#dd77ff',Ca:'#66ff88',Fe:'#dd7744',Mg:'#33bb33',Zn:'#9999dd',Cu:'#dd5500',Br:'#993311',I:'#8833aa',B:'#ffbbaa',Si:'#bb9966'};
-var AR={H:0.3,C:0.72,N:0.7,O:0.68,S:0.95,P:1.0,Cl:0.92,F:0.6,Na:1.6,K:1.9,Ca:1.7,Fe:1.1,Mg:1.4,Zn:1.1,Cu:1.1,Br:1.05,I:1.2,B:0.78,Si:1.1};
+var AC={H:'#e8e8ff',C:'#4a4a5a',N:'#4488ff',O:'#ff4444',S:'#ffdd00',P:'#ff8800',Cl:'#33dd33',F:'#aaffaa',Na:'#cc55ff',K:'#dd77ff',Ca:'#66ff88',Fe:'#dd7744',Mg:'#33bb33',Zn:'#9999dd',Cu:'#dd5500',Br:'#993311',I:'#8833aa',B:'#ffbbaa',Si:'#bb9966',Be:'#cceeaa',Xe:'#cc88ff'};
+var AR={H:0.3,C:0.72,N:0.7,O:0.68,S:0.95,P:1.0,Cl:0.92,F:0.6,Na:1.6,K:1.9,Ca:1.7,Fe:1.1,Mg:1.4,Zn:1.1,Cu:1.1,Br:1.05,I:1.2,B:0.78,Si:1.1,Be:0.9,Xe:1.3};
 
 var MOLS=[
 {name:'Water',formula:'H\u2082O',cat:'Basic',desc:'The foundation of all life. Polar molecule with strong hydrogen bonding. Unique surface tension properties.',atoms:[{e:'O',p:[0,0,0]},{e:'H',p:[0.96,0,0]},{e:'H',p:[-0.24,0.93,0]}],bonds:[[0,1],[0,2]]},
@@ -300,7 +376,19 @@ var MOLS=[
 {name:'Chlorophyll',formula:'C\u2085\u2085H\u2087\u2082MgN\u2084O\u2085',cat:'Special',desc:'Green pigment powering photosynthesis. Magnesium-centered porphyrin ring. Absorbs red and blue light.',atoms:[{e:'Mg',p:[0,0,0]},{e:'N',p:[1.8,0,0]},{e:'N',p:[0,1.8,0]},{e:'N',p:[-1.8,0,0]},{e:'N',p:[0,-1.8,0]},{e:'C',p:[2.8,1.0,0]},{e:'C',p:[1.0,2.8,0]},{e:'C',p:[-2.8,1.0,0]},{e:'C',p:[-1.0,-2.8,0]},{e:'C',p:[4.0,2.0,0]},{e:'C',p:[2.0,4.0,0]},{e:'C',p:[-4.0,2.0,0]}],bonds:[[0,1],[0,2],[0,3],[0,4],[1,5],[2,6],[3,7],[4,8],[5,9],[6,10],[7,11]]},
 {name:'Estrogen',formula:'C\u2081\u2088H\u2082\u2084O\u2082',cat:'Biological',desc:'Primary female sex hormone. Regulates reproductive system and secondary sex characteristics.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'C',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,2.5,0]},{e:'C',p:[-2.1,3.8,0]},{e:'C',p:[-0.7,3.8,0]},{e:'C',p:[2.8,3.6,0]},{e:'C',p:[4.2,3.6,0]},{e:'O',p:[-0.7,-1.2,0]},{e:'O',p:[4.9,4.8,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[7,8],[8,9],[9,4],[3,10],[10,11],[11,12],[0,12],[11,13]]},
 {name:'Testosterone',formula:'C\u2081\u2089H\u2082\u2088O\u2082',cat:'Biological',desc:'Primary male sex hormone. Drives muscle growth and bone density.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.5,0,0]},{e:'C',p:[2.2,1.3,0]},{e:'C',p:[1.5,2.6,0]},{e:'C',p:[0,2.6,0]},{e:'C',p:[-0.7,1.3,0]},{e:'C',p:[-2.2,1.3,0]},{e:'C',p:[-3.0,2.6,0]},{e:'C',p:[-2.2,3.9,0]},{e:'C',p:[-0.7,3.9,0]},{e:'O',p:[3.7,1.3,0]},{e:'C',p:[2.2,3.9,0]},{e:'C',p:[3.7,3.9,0]},{e:'O',p:[1.5,-1.3,0]},{e:'C',p:[4.4,2.6,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[7,8],[8,9],[9,4],[2,10],[3,11],[11,12],[12,14],[14,2],[0,13]]},
-{name:'Morphine',formula:'C\u2081\u2087H\u2081\u2089NO\u2083',cat:'Special',desc:'Powerful opioid painkiller. Natural alkaloid from opium poppy. Binds to mu-opioid receptors.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'N',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,2.5,0]},{e:'C',p:[-2.8,0,0]},{e:'O',p:[3.5,1.2,0]},{e:'O',p:[-0.7,3.7,0]},{e:'C',p:[-4.2,2.5,0]},{e:'C',p:[-4.2,0,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[6,8],[2,9],[4,10],[7,11],[8,12],[11,12]]}
+{name:'Morphine',formula:'C\u2081\u2087H\u2081\u2089NO\u2083',cat:'Special',desc:'Powerful opioid painkiller. Natural alkaloid from opium poppy. Binds to mu-opioid receptors.',atoms:[{e:'C',p:[0,0,0]},{e:'C',p:[1.4,0,0]},{e:'C',p:[2.1,1.2,0]},{e:'C',p:[1.4,2.4,0]},{e:'C',p:[0,2.4,0]},{e:'C',p:[-0.7,1.2,0]},{e:'N',p:[-2.1,1.2,0]},{e:'C',p:[-2.8,2.5,0]},{e:'C',p:[-2.8,0,0]},{e:'O',p:[3.5,1.2,0]},{e:'O',p:[-0.7,3.7,0]},{e:'C',p:[-4.2,2.5,0]},{e:'C',p:[-4.2,0,0]}],bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7],[6,8],[2,9],[4,10],[7,11],[8,12],[11,12]]},
+{name:'BeCl\u2082 (Linear)',formula:'BeCl\u2082',cat:'VSEPR',desc:'Linear geometry. 0 lone pairs on Be. Bond angle 180\u00b0. sp hybridization. Electron deficient molecule.',vsepr:{shape:'Linear',angle:'180\u00b0',lp:0,hyb:'sp',tip:'No lone pairs \u2192 perfect straight line!'},atoms:[{e:'Be',p:[0,0,0]},{e:'Cl',p:[1.8,0,0]},{e:'Cl',p:[-1.8,0,0]}],bonds:[[0,1],[0,2]]},
+{name:'BF\u2083 (Trigonal Planar)',formula:'BF\u2083',cat:'VSEPR',desc:'Trigonal planar geometry. 0 lone pairs. All atoms in same plane. Bond angle 120\u00b0. sp\u00b2 hybridization.',vsepr:{shape:'Trigonal Planar',angle:'120\u00b0',lp:0,hyb:'sp\u00b2',tip:'3 bond pairs, 0 LP \u2192 flat triangle shape'},atoms:[{e:'B',p:[0,0,0]},{e:'F',p:[1.3,0,0]},{e:'F',p:[-0.65,1.13,0]},{e:'F',p:[-0.65,-1.13,0]}],bonds:[[0,1],[0,2],[0,3]]},
+{name:'CH\u2084 (Tetrahedral)',formula:'CH\u2084',cat:'VSEPR',desc:'Perfect tetrahedral geometry. 0 lone pairs. Bond angle 109.5\u00b0. sp\u00b3 hybridization. Symmetric in 3D.',vsepr:{shape:'Tetrahedral',angle:'109.5\u00b0',lp:0,hyb:'sp\u00b3',tip:'4 bond pairs, 0 LP \u2192 perfect tetrahedron!'},atoms:[{e:'C',p:[0,0,0]},{e:'H',p:[1,1,1]},{e:'H',p:[-1,-1,1]},{e:'H',p:[-1,1,-1]},{e:'H',p:[1,-1,-1]}],bonds:[[0,1],[0,2],[0,3],[0,4]]},
+{name:'NH\u2083 (Trigonal Pyramidal)',formula:'NH\u2083',cat:'VSEPR',desc:'Trigonal pyramidal shape. 1 lone pair compresses bond angle to 107\u00b0. sp\u00b3 hybridization. Polar molecule.',vsepr:{shape:'Trigonal Pyramidal',angle:'107\u00b0',lp:1,hyb:'sp\u00b3',tip:'1 LP pushes bonds down \u2192 pyramid shape'},atoms:[{e:'N',p:[0,0,0]},{e:'H',p:[1.0,0,-0.33]},{e:'H',p:[-0.5,0.87,-0.33]},{e:'H',p:[-0.5,-0.87,-0.33]}],bonds:[[0,1],[0,2],[0,3]]},
+{name:'H\u2082O (Bent)',formula:'H\u2082O',cat:'VSEPR',desc:'Bent / V-shape. 2 lone pairs compress angle to 104.5\u00b0. Most polar simple molecule. Anomalous properties.',vsepr:{shape:'Bent (V-shape)',angle:'104.5\u00b0',lp:2,hyb:'sp\u00b3',tip:'2 LP \u2192 maximum compression of bond angle'},atoms:[{e:'O',p:[0,0,0]},{e:'H',p:[0.96,0,0]},{e:'H',p:[-0.24,0.93,0]}],bonds:[[0,1],[0,2]]},
+{name:'PCl\u2085 (Trigonal Bipyramidal)',formula:'PCl\u2085',cat:'VSEPR',desc:'Trigonal bipyramidal. 5 bond pairs, 0 lone pairs. Two types of positions: axial (90\u00b0) and equatorial (120\u00b0).',vsepr:{shape:'Trigonal Bipyramidal',angle:'90\u00b0/120\u00b0',lp:0,hyb:'sp\u00b3d',tip:'Axial bonds at 90\u00b0, equatorial at 120\u00b0'},atoms:[{e:'P',p:[0,0,0]},{e:'Cl',p:[1.5,0,0]},{e:'Cl',p:[-0.75,1.3,0]},{e:'Cl',p:[-0.75,-1.3,0]},{e:'Cl',p:[0,0,1.6]},{e:'Cl',p:[0,0,-1.6]}],bonds:[[0,1],[0,2],[0,3],[0,4],[0,5]]},
+{name:'SF\u2086 (Octahedral)',formula:'SF\u2086',cat:'VSEPR',desc:'Octahedral geometry. 6 bond pairs, 0 lone pairs. All bond angles 90\u00b0. sp\u00b3d\u00b2 hybridization. Highly symmetric.',vsepr:{shape:'Octahedral',angle:'90\u00b0',lp:0,hyb:'sp\u00b3d\u00b2',tip:'Most symmetric \u2014 equal 90\u00b0 angles in all directions'},atoms:[{e:'S',p:[0,0,0]},{e:'F',p:[1.5,0,0]},{e:'F',p:[-1.5,0,0]},{e:'F',p:[0,1.5,0]},{e:'F',p:[0,-1.5,0]},{e:'F',p:[0,0,1.5]},{e:'F',p:[0,0,-1.5]}],bonds:[[0,1],[0,2],[0,3],[0,4],[0,5],[0,6]]},
+{name:'ClF\u2083 (T-shape)',formula:'ClF\u2083',cat:'VSEPR',desc:'T-shaped geometry. 2 lone pairs in equatorial positions. Bond angles ~87.5\u00b0. Lone pairs cause distortion.',vsepr:{shape:'T-shape',angle:'87.5\u00b0',lp:2,hyb:'sp\u00b3d',tip:'2 LP occupy equatorial spots \u2192 T-shape remains'},atoms:[{e:'Cl',p:[0,0,0]},{e:'F',p:[1.6,0,0]},{e:'F',p:[-1.6,0,0]},{e:'F',p:[0,0,1.6]}],bonds:[[0,1],[0,2],[0,3]]},
+{name:'XeF\u2084 (Square Planar)',formula:'XeF\u2084',cat:'VSEPR',desc:'Square planar geometry. 2 lone pairs above and below the plane. All F-Xe-F angles are 90\u00b0. sp\u00b3d\u00b2 hybridization.',vsepr:{shape:'Square Planar',angle:'90\u00b0',lp:2,hyb:'sp\u00b3d\u00b2',tip:'2 LP opposite each other \u2192 cancel out, square plane'},atoms:[{e:'Xe',p:[0,0,0]},{e:'F',p:[1.9,0,0]},{e:'F',p:[-1.9,0,0]},{e:'F',p:[0,1.9,0]},{e:'F',p:[0,-1.9,0]}],bonds:[[0,1],[0,2],[0,3],[0,4]]},
+{name:'SO\u2082 (Bent)',formula:'SO\u2082',cat:'VSEPR',desc:'Bent molecule. 1 lone pair on S. Bond angle ~119\u00b0. sp\u00b2 hybridization. Causes acid rain when dissolved in water.',vsepr:{shape:'Bent',angle:'119\u00b0',lp:1,hyb:'sp\u00b2',tip:'1 LP in sp\u00b2 \u2192 slightly bent from 120\u00b0'},atoms:[{e:'S',p:[0,0,0]},{e:'O',p:[1.43,0,0]},{e:'O',p:[-0.71,1.23,0]}],bonds:[[0,1],[0,2]]},
+{name:'CO\u2082 (Linear)',formula:'CO\u2082',cat:'VSEPR',desc:'Linear molecule. 0 lone pairs on C. Bond angle 180\u00b0. sp hybridization. Non-polar despite polar bonds.',vsepr:{shape:'Linear',angle:'180\u00b0',lp:0,hyb:'sp',tip:'Polar bonds cancel \u2192 net dipole = 0, non-polar!'},atoms:[{e:'C',p:[0,0,0]},{e:'O',p:[1.16,0,0]},{e:'O',p:[-1.16,0,0]}],bonds:[[0,1],[0,2]]},
+{name:'IF\u2085 (Square Pyramidal)',formula:'IF\u2085',cat:'VSEPR',desc:'Square pyramidal. 1 lone pair pushes the apex I atom slightly out of plane. Bond angles ~81\u00b0.',vsepr:{shape:'Square Pyramidal',angle:'81\u00b0',lp:1,hyb:'sp\u00b3d\u00b2',tip:'1 LP below \u2192 pyramid leans, angles compress to 81\u00b0'},atoms:[{e:'I',p:[0,0.4,0]},{e:'F',p:[1.8,0,0]},{e:'F',p:[-1.8,0,0]},{e:'F',p:[0,0,1.8]},{e:'F',p:[0,0,-1.8]},{e:'F',p:[0,1.8,0]}],bonds:[[0,1],[0,2],[0,3],[0,4],[0,5]]}
 ];
 
 var CATS=['All'].concat(Array.from(new Set(MOLS.map(function(m){return m.cat;}))));
@@ -374,7 +462,23 @@ function selMolFn(idx){selMol=MOLS[idx];document.querySelectorAll('.mol-card').f
 function buildInfo(){
   var m=selMol,uniq=[];
   m.atoms.forEach(function(a){if(uniq.indexOf(a.e)<0)uniq.push(a.e);});
-  document.getElementById('molInfo').innerHTML='<div class="mol-info-top"><div style="flex:1;min-width:180px;"><div class="mol-bigname">'+m.name+'<span class="mol-bigformula">'+m.formula+'</span><span class="mol-cat-badge">'+m.cat+'</span></div><div class="mol-desc">'+m.desc+'</div><div class="mol-stats"><div class="mol-stat">Atoms: <span>'+m.atoms.length+'</span></div><div class="mol-stat">Bonds: <span>'+m.bonds.length+'</span></div></div><div class="atom-legend">'+uniq.map(function(e){return '<div class="atom-pill"><div class="atom-dot" style="background:'+(AC[e]||'#888')+'"></div>'+e+'</div>';}).join('')+'</div></div></div>';
+  var vsepHtml='';
+  if(m.vsepr){
+    var v=m.vsepr;
+    var lpDots='';
+    for(var i=0;i<v.lp;i++)lpDots+='<span class="lp-dot"></span>';
+    vsepHtml='<div class="vsepr-panel"><div class="vsepr-title">&#9670; VSEPR Theory</div>'
+      +'<div><span class="vsepr-shape-badge">'+v.shape+'</span></div>'
+      +'<div class="vsepr-grid">'
+      +'<div class="vsepr-cell"><div class="vsepr-cell-label">Bond Angle</div><div class="vsepr-cell-val">'+v.angle+'</div></div>'
+      +'<div class="vsepr-cell"><div class="vsepr-cell-label">Lone Pairs</div><div class="vsepr-cell-val">'+v.lp+'<span class="lp-dots">'+lpDots+'</span></div></div>'
+      +'<div class="vsepr-cell"><div class="vsepr-cell-label">Hybridization</div><div class="vsepr-cell-val">'+v.hyb+'</div></div>'
+      +'<div class="vsepr-cell"><div class="vsepr-cell-label">Bond Pairs</div><div class="vsepr-cell-val">'+(m.bonds.length)+'</div></div>'
+      +'</div>'
+      +'<div class="vsepr-tip">&#128161; '+v.tip+'</div>'
+      +'</div>';
+  }
+  document.getElementById('molInfo').innerHTML='<div class="mol-info-top"><div style="flex:1;min-width:180px;"><div class="mol-bigname">'+m.name+'<span class="mol-bigformula">'+m.formula+'</span><span class="mol-cat-badge">'+m.cat+'</span></div><div class="mol-desc">'+m.desc+'</div><div class="mol-stats"><div class="mol-stat">Atoms: <span>'+m.atoms.length+'</span></div><div class="mol-stat">Bonds: <span>'+m.bonds.length+'</span></div></div><div class="atom-legend">'+uniq.map(function(e){return '<div class="atom-pill"><div class="atom-dot" style="background:'+(AC[e]||'#888')+'"></div>'+e+'</div>';}).join('')+'</div>'+vsepHtml+'</div></div>';
 }
 
 function buildMain(){
@@ -407,7 +511,20 @@ function openModal(){
   modal.classList.add('open');
   var uniq=[];m.atoms.forEach(function(a){if(uniq.indexOf(a.e)<0)uniq.push(a.e);});
   document.getElementById('modalTitle').innerHTML=m.name+'<span class="mf">'+m.formula+'</span><span class="mb">'+m.cat+'</span>';
-  document.getElementById('modalInfo').innerHTML='<div class="modal-info-name">'+m.name+'</div><div class="modal-info-formula">'+m.formula+'</div><div class="modal-info-desc">'+m.desc+'</div><div class="modal-info-stats"><div class="modal-info-stat">Atoms: <span>'+m.atoms.length+'</span></div><div class="modal-info-stat">Bonds: <span>'+m.bonds.length+'</span></div></div><div class="modal-info-legend">'+uniq.map(function(e){return '<div class="atom-pill"><div class="atom-dot" style="background:'+(AC[e]||'#888')+'"></div>'+e+'</div>';}).join('')+'</div>';
+  var vsepHtml2='';
+  if(m.vsepr){
+    var v2=m.vsepr;
+    var lpDots2='';for(var li=0;li<v2.lp;li++)lpDots2+='<span class="lp-dot"></span>';
+    vsepHtml2='<div class="vsepr-panel" style="margin-top:10px;"><div class="vsepr-title">&#9670; VSEPR</div>'
+      +'<span class="vsepr-shape-badge">'+v2.shape+'</span>'
+      +'<div class="vsepr-grid" style="margin-top:6px;">'
+      +'<div class="vsepr-cell"><div class="vsepr-cell-label">Angle</div><div class="vsepr-cell-val">'+v2.angle+'</div></div>'
+      +'<div class="vsepr-cell"><div class="vsepr-cell-label">Lone Pairs</div><div class="vsepr-cell-val">'+v2.lp+'<span class="lp-dots">'+lpDots2+'</span></div></div>'
+      +'<div class="vsepr-cell"><div class="vsepr-cell-label">Hybrid.</div><div class="vsepr-cell-val">'+v2.hyb+'</div></div>'
+      +'<div class="vsepr-cell"><div class="vsepr-cell-label">Bonds</div><div class="vsepr-cell-val">'+m.bonds.length+'</div></div>'
+      +'</div><div class="vsepr-tip">&#128161; '+v2.tip+'</div></div>';
+  }
+  document.getElementById('modalInfo').innerHTML='<div class="modal-info-name">'+m.name+'</div><div class="modal-info-formula">'+m.formula+'</div><div class="modal-info-desc">'+m.desc+'</div><div class="modal-info-stats"><div class="modal-info-stat">Atoms: <span>'+m.atoms.length+'</span></div><div class="modal-info-stat">Bonds: <span>'+m.bonds.length+'</span></div></div><div class="modal-info-legend">'+uniq.map(function(e){return '<div class="atom-pill"><div class="atom-dot" style="background:'+(AC[e]||'#888')+'"></div>'+e+'</div>';}).join('')+'</div>'+vsepHtml2;
   cancelAnimationFrame(modalAnimId);if(modalRenderer){try{modalRenderer.dispose();modalRenderer=null;}catch(e){}}
   requestAnimationFrame(function(){
     var canvas=document.getElementById('modalCanvas'),wrap=canvas.parentElement;
@@ -459,5 +576,362 @@ mc.addEventListener('touchend',function(){dragging=false;},{passive:true});
 document.getElementById('searchInput').addEventListener('input',function(){searchQ=this.value.toLowerCase().trim();buildGrid();});
 window.addEventListener('resize',function(){if(selMol)buildMain();});
 buildTabs();buildGrid();buildInfo();buildMain();
+
+// ===== PERIODIC TABLE =====
+var PT_CATS={
+  'Alkali Metal':     {c:'#4a2a6a',b:'#8855bb'},
+  'Alkaline Earth':   {c:'#2a4a2a',b:'#44aa44'},
+  'Transition Metal': {c:'#2a3a5a',b:'#4488cc'},
+  'Post-Transition':  {c:'#3a3a2a',b:'#aaaa44'},
+  'Metalloid':        {c:'#3a2a2a',b:'#cc7744'},
+  'Nonmetal':         {c:'#1a3a4a',b:'#44aabb'},
+  'Halogen':          {c:'#2a1a3a',b:'#9944cc'},
+  'Noble Gas':        {c:'#1a2a4a',b:'#4466ff'},
+  'Lanthanide':       {c:'#3a2a1a',b:'#cc8833'},
+  'Actinide':         {c:'#3a1a1a',b:'#cc4444'}
+};
+var ELEMENTS=[
+  {n:1,sym:'H',name:'Hydrogen',mass:'1.008',cat:'Nonmetal',config:'1s¹',phase:'Gas',group:1,period:1,melt:'-259°C',boil:'-253°C',density:'0.09 g/L'},
+  {n:2,sym:'He',name:'Helium',mass:'4.003',cat:'Noble Gas',config:'1s²',phase:'Gas',group:18,period:1,melt:'-272°C',boil:'-269°C',density:'0.18 g/L'},
+  {n:3,sym:'Li',name:'Lithium',mass:'6.941',cat:'Alkali Metal',config:'[He] 2s¹',phase:'Solid',group:1,period:2,melt:'180°C',boil:'1342°C',density:'0.53 g/cm³'},
+  {n:4,sym:'Be',name:'Beryllium',mass:'9.012',cat:'Alkaline Earth',config:'[He] 2s²',phase:'Solid',group:2,period:2,melt:'1287°C',boil:'2470°C',density:'1.85 g/cm³'},
+  {n:5,sym:'B',name:'Boron',mass:'10.81',cat:'Metalloid',config:'[He] 2s² 2p¹',phase:'Solid',group:13,period:2,melt:'2075°C',boil:'4000°C',density:'2.34 g/cm³'},
+  {n:6,sym:'C',name:'Carbon',mass:'12.01',cat:'Nonmetal',config:'[He] 2s² 2p²',phase:'Solid',group:14,period:2,melt:'3550°C',boil:'4827°C',density:'2.27 g/cm³'},
+  {n:7,sym:'N',name:'Nitrogen',mass:'14.01',cat:'Nonmetal',config:'[He] 2s² 2p³',phase:'Gas',group:15,period:2,melt:'-210°C',boil:'-196°C',density:'1.25 g/L'},
+  {n:8,sym:'O',name:'Oxygen',mass:'16.00',cat:'Nonmetal',config:'[He] 2s² 2p⁴',phase:'Gas',group:16,period:2,melt:'-218°C',boil:'-183°C',density:'1.43 g/L'},
+  {n:9,sym:'F',name:'Fluorine',mass:'19.00',cat:'Halogen',config:'[He] 2s² 2p⁵',phase:'Gas',group:17,period:2,melt:'-220°C',boil:'-188°C',density:'1.70 g/L'},
+  {n:10,sym:'Ne',name:'Neon',mass:'20.18',cat:'Noble Gas',config:'[He] 2s² 2p⁶',phase:'Gas',group:18,period:2,melt:'-249°C',boil:'-246°C',density:'0.90 g/L'},
+  {n:11,sym:'Na',name:'Sodium',mass:'22.99',cat:'Alkali Metal',config:'[Ne] 3s¹',phase:'Solid',group:1,period:3,melt:'98°C',boil:'883°C',density:'0.97 g/cm³'},
+  {n:12,sym:'Mg',name:'Magnesium',mass:'24.31',cat:'Alkaline Earth',config:'[Ne] 3s²',phase:'Solid',group:2,period:3,melt:'650°C',boil:'1090°C',density:'1.74 g/cm³'},
+  {n:13,sym:'Al',name:'Aluminium',mass:'26.98',cat:'Post-Transition',config:'[Ne] 3s² 3p¹',phase:'Solid',group:13,period:3,melt:'660°C',boil:'2519°C',density:'2.70 g/cm³'},
+  {n:14,sym:'Si',name:'Silicon',mass:'28.09',cat:'Metalloid',config:'[Ne] 3s² 3p²',phase:'Solid',group:14,period:3,melt:'1414°C',boil:'3265°C',density:'2.33 g/cm³'},
+  {n:15,sym:'P',name:'Phosphorus',mass:'30.97',cat:'Nonmetal',config:'[Ne] 3s² 3p³',phase:'Solid',group:15,period:3,melt:'44°C',boil:'280°C',density:'1.82 g/cm³'},
+  {n:16,sym:'S',name:'Sulfur',mass:'32.06',cat:'Nonmetal',config:'[Ne] 3s² 3p⁴',phase:'Solid',group:16,period:3,melt:'113°C',boil:'445°C',density:'2.07 g/cm³'},
+  {n:17,sym:'Cl',name:'Chlorine',mass:'35.45',cat:'Halogen',config:'[Ne] 3s² 3p⁵',phase:'Gas',group:17,period:3,melt:'-102°C',boil:'-34°C',density:'3.21 g/L'},
+  {n:18,sym:'Ar',name:'Argon',mass:'39.95',cat:'Noble Gas',config:'[Ne] 3s² 3p⁶',phase:'Gas',group:18,period:3,melt:'-189°C',boil:'-186°C',density:'1.78 g/L'},
+  {n:19,sym:'K',name:'Potassium',mass:'39.10',cat:'Alkali Metal',config:'[Ar] 4s¹',phase:'Solid',group:1,period:4,melt:'63°C',boil:'759°C',density:'0.86 g/cm³'},
+  {n:20,sym:'Ca',name:'Calcium',mass:'40.08',cat:'Alkaline Earth',config:'[Ar] 4s²',phase:'Solid',group:2,period:4,melt:'842°C',boil:'1484°C',density:'1.55 g/cm³'},
+  {n:21,sym:'Sc',name:'Scandium',mass:'44.96',cat:'Transition Metal',config:'[Ar] 3d¹ 4s²',phase:'Solid',group:3,period:4,melt:'1541°C',boil:'2836°C',density:'2.99 g/cm³'},
+  {n:22,sym:'Ti',name:'Titanium',mass:'47.87',cat:'Transition Metal',config:'[Ar] 3d² 4s²',phase:'Solid',group:4,period:4,melt:'1668°C',boil:'3287°C',density:'4.51 g/cm³'},
+  {n:23,sym:'V',name:'Vanadium',mass:'50.94',cat:'Transition Metal',config:'[Ar] 3d³ 4s²',phase:'Solid',group:5,period:4,melt:'1910°C',boil:'3407°C',density:'6.11 g/cm³'},
+  {n:24,sym:'Cr',name:'Chromium',mass:'52.00',cat:'Transition Metal',config:'[Ar] 3d⁵ 4s¹',phase:'Solid',group:6,period:4,melt:'1907°C',boil:'2671°C',density:'7.15 g/cm³'},
+  {n:25,sym:'Mn',name:'Manganese',mass:'54.94',cat:'Transition Metal',config:'[Ar] 3d⁵ 4s²',phase:'Solid',group:7,period:4,melt:'1246°C',boil:'2061°C',density:'7.44 g/cm³'},
+  {n:26,sym:'Fe',name:'Iron',mass:'55.85',cat:'Transition Metal',config:'[Ar] 3d⁶ 4s²',phase:'Solid',group:8,period:4,melt:'1538°C',boil:'2861°C',density:'7.87 g/cm³'},
+  {n:27,sym:'Co',name:'Cobalt',mass:'58.93',cat:'Transition Metal',config:'[Ar] 3d⁷ 4s²',phase:'Solid',group:9,period:4,melt:'1495°C',boil:'2927°C',density:'8.90 g/cm³'},
+  {n:28,sym:'Ni',name:'Nickel',mass:'58.69',cat:'Transition Metal',config:'[Ar] 3d⁸ 4s²',phase:'Solid',group:10,period:4,melt:'1455°C',boil:'2913°C',density:'8.91 g/cm³'},
+  {n:29,sym:'Cu',name:'Copper',mass:'63.55',cat:'Transition Metal',config:'[Ar] 3d¹⁰ 4s¹',phase:'Solid',group:11,period:4,melt:'1085°C',boil:'2562°C',density:'8.96 g/cm³'},
+  {n:30,sym:'Zn',name:'Zinc',mass:'65.38',cat:'Transition Metal',config:'[Ar] 3d¹⁰ 4s²',phase:'Solid',group:12,period:4,melt:'420°C',boil:'907°C',density:'7.13 g/cm³'},
+  {n:31,sym:'Ga',name:'Gallium',mass:'69.72',cat:'Post-Transition',config:'[Ar] 3d¹⁰ 4s² 4p¹',phase:'Solid',group:13,period:4,melt:'30°C',boil:'2204°C',density:'5.91 g/cm³'},
+  {n:32,sym:'Ge',name:'Germanium',mass:'72.63',cat:'Metalloid',config:'[Ar] 3d¹⁰ 4s² 4p²',phase:'Solid',group:14,period:4,melt:'938°C',boil:'2833°C',density:'5.32 g/cm³'},
+  {n:33,sym:'As',name:'Arsenic',mass:'74.92',cat:'Metalloid',config:'[Ar] 3d¹⁰ 4s² 4p³',phase:'Solid',group:15,period:4,melt:'817°C',boil:'614°C',density:'5.73 g/cm³'},
+  {n:34,sym:'Se',name:'Selenium',mass:'78.97',cat:'Nonmetal',config:'[Ar] 3d¹⁰ 4s² 4p⁴',phase:'Solid',group:16,period:4,melt:'221°C',boil:'685°C',density:'4.81 g/cm³'},
+  {n:35,sym:'Br',name:'Bromine',mass:'79.90',cat:'Halogen',config:'[Ar] 3d¹⁰ 4s² 4p⁵',phase:'Liquid',group:17,period:4,melt:'-7°C',boil:'59°C',density:'3.10 g/cm³'},
+  {n:36,sym:'Kr',name:'Krypton',mass:'83.80',cat:'Noble Gas',config:'[Ar] 3d¹⁰ 4s² 4p⁶',phase:'Gas',group:18,period:4,melt:'-157°C',boil:'-153°C',density:'3.75 g/L'},
+  {n:37,sym:'Rb',name:'Rubidium',mass:'85.47',cat:'Alkali Metal',config:'[Kr] 5s¹',phase:'Solid',group:1,period:5,melt:'39°C',boil:'688°C',density:'1.53 g/cm³'},
+  {n:38,sym:'Sr',name:'Strontium',mass:'87.62',cat:'Alkaline Earth',config:'[Kr] 5s²',phase:'Solid',group:2,period:5,melt:'777°C',boil:'1382°C',density:'2.64 g/cm³'},
+  {n:39,sym:'Y',name:'Yttrium',mass:'88.91',cat:'Transition Metal',config:'[Kr] 4d¹ 5s²',phase:'Solid',group:3,period:5,melt:'1526°C',boil:'3336°C',density:'4.47 g/cm³'},
+  {n:40,sym:'Zr',name:'Zirconium',mass:'91.22',cat:'Transition Metal',config:'[Kr] 4d² 5s²',phase:'Solid',group:4,period:5,melt:'1855°C',boil:'4409°C',density:'6.51 g/cm³'},
+  {n:41,sym:'Nb',name:'Niobium',mass:'92.91',cat:'Transition Metal',config:'[Kr] 4d⁴ 5s¹',phase:'Solid',group:5,period:5,melt:'2477°C',boil:'4744°C',density:'8.57 g/cm³'},
+  {n:42,sym:'Mo',name:'Molybdenum',mass:'95.96',cat:'Transition Metal',config:'[Kr] 4d⁵ 5s¹',phase:'Solid',group:6,period:5,melt:'2623°C',boil:'4639°C',density:'10.2 g/cm³'},
+  {n:43,sym:'Tc',name:'Technetium',mass:'98',cat:'Transition Metal',config:'[Kr] 4d⁵ 5s²',phase:'Solid',group:7,period:5,melt:'2157°C',boil:'4265°C',density:'11.5 g/cm³'},
+  {n:44,sym:'Ru',name:'Ruthenium',mass:'101.1',cat:'Transition Metal',config:'[Kr] 4d⁷ 5s¹',phase:'Solid',group:8,period:5,melt:'2334°C',boil:'4150°C',density:'12.4 g/cm³'},
+  {n:45,sym:'Rh',name:'Rhodium',mass:'102.9',cat:'Transition Metal',config:'[Kr] 4d⁸ 5s¹',phase:'Solid',group:9,period:5,melt:'1964°C',boil:'3695°C',density:'12.4 g/cm³'},
+  {n:46,sym:'Pd',name:'Palladium',mass:'106.4',cat:'Transition Metal',config:'[Kr] 4d¹⁰',phase:'Solid',group:10,period:5,melt:'1555°C',boil:'2963°C',density:'12.0 g/cm³'},
+  {n:47,sym:'Ag',name:'Silver',mass:'107.9',cat:'Transition Metal',config:'[Kr] 4d¹⁰ 5s¹',phase:'Solid',group:11,period:5,melt:'962°C',boil:'2162°C',density:'10.5 g/cm³'},
+  {n:48,sym:'Cd',name:'Cadmium',mass:'112.4',cat:'Transition Metal',config:'[Kr] 4d¹⁰ 5s²',phase:'Solid',group:12,period:5,melt:'321°C',boil:'767°C',density:'8.65 g/cm³'},
+  {n:49,sym:'In',name:'Indium',mass:'114.8',cat:'Post-Transition',config:'[Kr] 4d¹⁰ 5s² 5p¹',phase:'Solid',group:13,period:5,melt:'157°C',boil:'2072°C',density:'7.31 g/cm³'},
+  {n:50,sym:'Sn',name:'Tin',mass:'118.7',cat:'Post-Transition',config:'[Kr] 4d¹⁰ 5s² 5p²',phase:'Solid',group:14,period:5,melt:'232°C',boil:'2602°C',density:'7.31 g/cm³'},
+  {n:51,sym:'Sb',name:'Antimony',mass:'121.8',cat:'Metalloid',config:'[Kr] 4d¹⁰ 5s² 5p³',phase:'Solid',group:15,period:5,melt:'631°C',boil:'1587°C',density:'6.68 g/cm³'},
+  {n:52,sym:'Te',name:'Tellurium',mass:'127.6',cat:'Metalloid',config:'[Kr] 4d¹⁰ 5s² 5p⁴',phase:'Solid',group:16,period:5,melt:'450°C',boil:'988°C',density:'6.24 g/cm³'},
+  {n:53,sym:'I',name:'Iodine',mass:'126.9',cat:'Halogen',config:'[Kr] 4d¹⁰ 5s² 5p⁵',phase:'Solid',group:17,period:5,melt:'114°C',boil:'184°C',density:'4.93 g/cm³'},
+  {n:54,sym:'Xe',name:'Xenon',mass:'131.3',cat:'Noble Gas',config:'[Kr] 4d¹⁰ 5s² 5p⁶',phase:'Gas',group:18,period:5,melt:'-112°C',boil:'-108°C',density:'5.90 g/L'},
+  {n:55,sym:'Cs',name:'Caesium',mass:'132.9',cat:'Alkali Metal',config:'[Xe] 6s¹',phase:'Solid',group:1,period:6,melt:'29°C',boil:'671°C',density:'1.93 g/cm³'},
+  {n:56,sym:'Ba',name:'Barium',mass:'137.3',cat:'Alkaline Earth',config:'[Xe] 6s²',phase:'Solid',group:2,period:6,melt:'727°C',boil:'1845°C',density:'3.62 g/cm³'},
+  {n:57,sym:'La',name:'Lanthanum',mass:'138.9',cat:'Lanthanide',config:'[Xe] 5d¹ 6s²',phase:'Solid',group:3,period:6,melt:'920°C',boil:'3464°C',density:'6.15 g/cm³'},
+  {n:58,sym:'Ce',name:'Cerium',mass:'140.1',cat:'Lanthanide',config:'[Xe] 4f¹ 5d¹ 6s²',phase:'Solid',group:3,period:6,melt:'795°C',boil:'3443°C',density:'6.77 g/cm³'},
+  {n:59,sym:'Pr',name:'Praseodymium',mass:'140.9',cat:'Lanthanide',config:'[Xe] 4f³ 6s²',phase:'Solid',group:3,period:6,melt:'931°C',boil:'3520°C',density:'6.77 g/cm³'},
+  {n:60,sym:'Nd',name:'Neodymium',mass:'144.2',cat:'Lanthanide',config:'[Xe] 4f⁴ 6s²',phase:'Solid',group:3,period:6,melt:'1021°C',boil:'3074°C',density:'7.01 g/cm³'},
+  {n:61,sym:'Pm',name:'Promethium',mass:'145',cat:'Lanthanide',config:'[Xe] 4f⁵ 6s²',phase:'Solid',group:3,period:6,melt:'1100°C',boil:'3000°C',density:'7.26 g/cm³'},
+  {n:62,sym:'Sm',name:'Samarium',mass:'150.4',cat:'Lanthanide',config:'[Xe] 4f⁶ 6s²',phase:'Solid',group:3,period:6,melt:'1072°C',boil:'1794°C',density:'7.52 g/cm³'},
+  {n:63,sym:'Eu',name:'Europium',mass:'152.0',cat:'Lanthanide',config:'[Xe] 4f⁷ 6s²',phase:'Solid',group:3,period:6,melt:'822°C',boil:'1529°C',density:'5.24 g/cm³'},
+  {n:64,sym:'Gd',name:'Gadolinium',mass:'157.3',cat:'Lanthanide',config:'[Xe] 4f⁷ 5d¹ 6s²',phase:'Solid',group:3,period:6,melt:'1313°C',boil:'3273°C',density:'7.90 g/cm³'},
+  {n:65,sym:'Tb',name:'Terbium',mass:'158.9',cat:'Lanthanide',config:'[Xe] 4f⁹ 6s²',phase:'Solid',group:3,period:6,melt:'1356°C',boil:'3230°C',density:'8.23 g/cm³'},
+  {n:66,sym:'Dy',name:'Dysprosium',mass:'162.5',cat:'Lanthanide',config:'[Xe] 4f¹⁰ 6s²',phase:'Solid',group:3,period:6,melt:'1412°C',boil:'2567°C',density:'8.55 g/cm³'},
+  {n:67,sym:'Ho',name:'Holmium',mass:'164.9',cat:'Lanthanide',config:'[Xe] 4f¹¹ 6s²',phase:'Solid',group:3,period:6,melt:'1474°C',boil:'2700°C',density:'8.80 g/cm³'},
+  {n:68,sym:'Er',name:'Erbium',mass:'167.3',cat:'Lanthanide',config:'[Xe] 4f¹² 6s²',phase:'Solid',group:3,period:6,melt:'1529°C',boil:'2868°C',density:'9.07 g/cm³'},
+  {n:69,sym:'Tm',name:'Thulium',mass:'168.9',cat:'Lanthanide',config:'[Xe] 4f¹³ 6s²',phase:'Solid',group:3,period:6,melt:'1545°C',boil:'1950°C',density:'9.32 g/cm³'},
+  {n:70,sym:'Yb',name:'Ytterbium',mass:'173.0',cat:'Lanthanide',config:'[Xe] 4f¹⁴ 6s²',phase:'Solid',group:3,period:6,melt:'824°C',boil:'1196°C',density:'6.90 g/cm³'},
+  {n:71,sym:'Lu',name:'Lutetium',mass:'175.0',cat:'Lanthanide',config:'[Xe] 4f¹⁴ 5d¹ 6s²',phase:'Solid',group:3,period:6,melt:'1663°C',boil:'3402°C',density:'9.84 g/cm³'},
+  {n:72,sym:'Hf',name:'Hafnium',mass:'178.5',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d² 6s²',phase:'Solid',group:4,period:6,melt:'2233°C',boil:'4603°C',density:'13.3 g/cm³'},
+  {n:73,sym:'Ta',name:'Tantalum',mass:'180.9',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d³ 6s²',phase:'Solid',group:5,period:6,melt:'3017°C',boil:'5458°C',density:'16.7 g/cm³'},
+  {n:74,sym:'W',name:'Tungsten',mass:'183.8',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d⁴ 6s²',phase:'Solid',group:6,period:6,melt:'3422°C',boil:'5555°C',density:'19.3 g/cm³'},
+  {n:75,sym:'Re',name:'Rhenium',mass:'186.2',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d⁵ 6s²',phase:'Solid',group:7,period:6,melt:'3186°C',boil:'5596°C',density:'21.0 g/cm³'},
+  {n:76,sym:'Os',name:'Osmium',mass:'190.2',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d⁶ 6s²',phase:'Solid',group:8,period:6,melt:'3033°C',boil:'5012°C',density:'22.6 g/cm³'},
+  {n:77,sym:'Ir',name:'Iridium',mass:'192.2',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d⁷ 6s²',phase:'Solid',group:9,period:6,melt:'2446°C',boil:'4428°C',density:'22.4 g/cm³'},
+  {n:78,sym:'Pt',name:'Platinum',mass:'195.1',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d⁹ 6s¹',phase:'Solid',group:10,period:6,melt:'1768°C',boil:'3825°C',density:'21.5 g/cm³'},
+  {n:79,sym:'Au',name:'Gold',mass:'197.0',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d¹⁰ 6s¹',phase:'Solid',group:11,period:6,melt:'1064°C',boil:'2856°C',density:'19.3 g/cm³'},
+  {n:80,sym:'Hg',name:'Mercury',mass:'200.6',cat:'Transition Metal',config:'[Xe] 4f¹⁴ 5d¹⁰ 6s²',phase:'Liquid',group:12,period:6,melt:'-39°C',boil:'357°C',density:'13.5 g/cm³'},
+  {n:81,sym:'Tl',name:'Thallium',mass:'204.4',cat:'Post-Transition',config:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹',phase:'Solid',group:13,period:6,melt:'304°C',boil:'1473°C',density:'11.9 g/cm³'},
+  {n:82,sym:'Pb',name:'Lead',mass:'207.2',cat:'Post-Transition',config:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²',phase:'Solid',group:14,period:6,melt:'327°C',boil:'1749°C',density:'11.3 g/cm³'},
+  {n:83,sym:'Bi',name:'Bismuth',mass:'209.0',cat:'Post-Transition',config:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³',phase:'Solid',group:15,period:6,melt:'271°C',boil:'1564°C',density:'9.79 g/cm³'},
+  {n:84,sym:'Po',name:'Polonium',mass:'209',cat:'Post-Transition',config:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴',phase:'Solid',group:16,period:6,melt:'254°C',boil:'962°C',density:'9.20 g/cm³'},
+  {n:85,sym:'At',name:'Astatine',mass:'210',cat:'Halogen',config:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵',phase:'Solid',group:17,period:6,melt:'302°C',boil:'337°C',density:'~7 g/cm³'},
+  {n:86,sym:'Rn',name:'Radon',mass:'222',cat:'Noble Gas',config:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶',phase:'Gas',group:18,period:6,melt:'-71°C',boil:'-62°C',density:'9.73 g/L'},
+  {n:87,sym:'Fr',name:'Francium',mass:'223',cat:'Alkali Metal',config:'[Rn] 7s¹',phase:'Solid',group:1,period:7,melt:'27°C',boil:'677°C',density:'~1.87 g/cm³'},
+  {n:88,sym:'Ra',name:'Radium',mass:'226',cat:'Alkaline Earth',config:'[Rn] 7s²',phase:'Solid',group:2,period:7,melt:'700°C',boil:'1737°C',density:'5.50 g/cm³'},
+  {n:89,sym:'Ac',name:'Actinium',mass:'227',cat:'Actinide',config:'[Rn] 6d¹ 7s²',phase:'Solid',group:3,period:7,melt:'1050°C',boil:'3200°C',density:'10.1 g/cm³'},
+  {n:90,sym:'Th',name:'Thorium',mass:'232.0',cat:'Actinide',config:'[Rn] 6d² 7s²',phase:'Solid',group:3,period:7,melt:'1750°C',boil:'4788°C',density:'11.7 g/cm³'},
+  {n:91,sym:'Pa',name:'Protactinium',mass:'231.0',cat:'Actinide',config:'[Rn] 5f² 6d¹ 7s²',phase:'Solid',group:3,period:7,melt:'1568°C',boil:'4000°C',density:'15.4 g/cm³'},
+  {n:92,sym:'U',name:'Uranium',mass:'238.0',cat:'Actinide',config:'[Rn] 5f³ 6d¹ 7s²',phase:'Solid',group:3,period:7,melt:'1135°C',boil:'4131°C',density:'19.1 g/cm³'},
+  {n:93,sym:'Np',name:'Neptunium',mass:'237',cat:'Actinide',config:'[Rn] 5f⁴ 6d¹ 7s²',phase:'Solid',group:3,period:7,melt:'644°C',boil:'4000°C',density:'20.5 g/cm³'},
+  {n:94,sym:'Pu',name:'Plutonium',mass:'244',cat:'Actinide',config:'[Rn] 5f⁶ 7s²',phase:'Solid',group:3,period:7,melt:'640°C',boil:'3228°C',density:'19.8 g/cm³'},
+  {n:95,sym:'Am',name:'Americium',mass:'243',cat:'Actinide',config:'[Rn] 5f⁷ 7s²',phase:'Solid',group:3,period:7,melt:'1176°C',boil:'2011°C',density:'13.7 g/cm³'},
+  {n:96,sym:'Cm',name:'Curium',mass:'247',cat:'Actinide',config:'[Rn] 5f⁷ 6d¹ 7s²',phase:'Solid',group:3,period:7,melt:'1345°C',boil:'3110°C',density:'13.5 g/cm³'},
+  {n:97,sym:'Bk',name:'Berkelium',mass:'247',cat:'Actinide',config:'[Rn] 5f⁹ 7s²',phase:'Solid',group:3,period:7,melt:'986°C',boil:'~2900°C',density:'14.8 g/cm³'},
+  {n:98,sym:'Cf',name:'Californium',mass:'251',cat:'Actinide',config:'[Rn] 5f¹⁰ 7s²',phase:'Solid',group:3,period:7,melt:'900°C',boil:'~1470°C',density:'15.1 g/cm³'},
+  {n:99,sym:'Es',name:'Einsteinium',mass:'252',cat:'Actinide',config:'[Rn] 5f¹¹ 7s²',phase:'Solid',group:3,period:7,melt:'860°C',boil:'~996°C',density:'~8.84 g/cm³'},
+  {n:100,sym:'Fm',name:'Fermium',mass:'257',cat:'Actinide',config:'[Rn] 5f¹² 7s²',phase:'Solid',group:3,period:7,melt:'1527°C',boil:'~?',density:'~?'},
+  {n:101,sym:'Md',name:'Mendelevium',mass:'258',cat:'Actinide',config:'[Rn] 5f¹³ 7s²',phase:'Solid',group:3,period:7,melt:'827°C',boil:'~?',density:'~?'},
+  {n:102,sym:'No',name:'Nobelium',mass:'259',cat:'Actinide',config:'[Rn] 5f¹⁴ 7s²',phase:'Solid',group:3,period:7,melt:'827°C',boil:'~?',density:'~?'},
+  {n:103,sym:'Lr',name:'Lawrencium',mass:'266',cat:'Actinide',config:'[Rn] 5f¹⁴ 7s² 7p¹',phase:'Solid',group:3,period:7,melt:'1627°C',boil:'~?',density:'~?'},
+  {n:104,sym:'Rf',name:'Rutherfordium',mass:'267',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d² 7s²',phase:'Solid',group:4,period:7,melt:'~2100°C',boil:'~5500°C',density:'~23 g/cm³'},
+  {n:105,sym:'Db',name:'Dubnium',mass:'268',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d³ 7s²',phase:'Solid',group:5,period:7,melt:'~?',boil:'~?',density:'~29 g/cm³'},
+  {n:106,sym:'Sg',name:'Seaborgium',mass:'271',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d⁴ 7s²',phase:'Solid',group:6,period:7,melt:'~?',boil:'~?',density:'~35 g/cm³'},
+  {n:107,sym:'Bh',name:'Bohrium',mass:'272',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d⁵ 7s²',phase:'Solid',group:7,period:7,melt:'~?',boil:'~?',density:'~37 g/cm³'},
+  {n:108,sym:'Hs',name:'Hassium',mass:'270',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d⁶ 7s²',phase:'Solid',group:8,period:7,melt:'~?',boil:'~?',density:'~41 g/cm³'},
+  {n:109,sym:'Mt',name:'Meitnerium',mass:'278',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d⁷ 7s²',phase:'Solid',group:9,period:7,melt:'~?',boil:'~?',density:'~38 g/cm³'},
+  {n:110,sym:'Ds',name:'Darmstadtium',mass:'281',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d⁸ 7s²',phase:'Solid',group:10,period:7,melt:'~?',boil:'~?',density:'~34 g/cm³'},
+  {n:111,sym:'Rg',name:'Roentgenium',mass:'282',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d¹⁰ 7s¹',phase:'Solid',group:11,period:7,melt:'~?',boil:'~?',density:'~28 g/cm³'},
+  {n:112,sym:'Cn',name:'Copernicium',mass:'285',cat:'Transition Metal',config:'[Rn] 5f¹⁴ 6d¹⁰ 7s²',phase:'Gas',group:12,period:7,melt:'~?',boil:'~357°C',density:'~14 g/cm³'},
+  {n:113,sym:'Nh',name:'Nihonium',mass:'286',cat:'Post-Transition',config:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹',phase:'Solid',group:13,period:7,melt:'~430°C',boil:'~1100°C',density:'~16 g/cm³'},
+  {n:114,sym:'Fl',name:'Flerovium',mass:'289',cat:'Post-Transition',config:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²',phase:'Solid',group:14,period:7,melt:'~?',boil:'~?',density:'~14 g/cm³'},
+  {n:115,sym:'Mc',name:'Moscovium',mass:'290',cat:'Post-Transition',config:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³',phase:'Solid',group:15,period:7,melt:'~?',boil:'~?',density:'~13 g/cm³'},
+  {n:116,sym:'Lv',name:'Livermorium',mass:'293',cat:'Post-Transition',config:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴',phase:'Solid',group:16,period:7,melt:'~?',boil:'~?',density:'~12 g/cm³'},
+  {n:117,sym:'Ts',name:'Tennessine',mass:'294',cat:'Halogen',config:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵',phase:'Solid',group:17,period:7,melt:'~?',boil:'~?',density:'~7 g/cm³'},
+  {n:118,sym:'Og',name:'Oganesson',mass:'294',cat:'Noble Gas',config:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶',phase:'Solid',group:18,period:7,melt:'~?',boil:'~?',density:'~5 g/cm³'}
+];
+
+// ===== 3D ATOM MODEL =====
+var atomRenderer=null,atomScene=null,atomCamera=null,atomAnimId=null;
+var atomSpin=true,atomDragging=false,atomPrevMx={x:0,y:0},atomRotX=0.3,atomRotY=0;
+
+// Electron shell fill order (Aufbau simplified for Bohr model display)
+function getElectronShells(atomicNum){
+  var maxPerShell=[2,8,18,32,32,18,8];
+  var shells=[];
+  var remaining=atomicNum;
+  for(var i=0;i<maxPerShell.length&&remaining>0;i++){
+    var fill=Math.min(remaining,maxPerShell[i]);
+    shells.push(fill);
+    remaining-=fill;
+  }
+  return shells;
+}
+
+function buildAtom3D(el,accentHex){
+  cancelAnimationFrame(atomAnimId);
+  if(atomRenderer){try{atomRenderer.dispose();}catch(e){} atomRenderer=null;}
+  var canvas=document.getElementById('ptAtomCanvas');
+  if(!canvas)return;
+  var W=canvas.parentElement.clientWidth||320,H=220;
+  canvas.width=W;canvas.height=H;canvas.style.height=H+'px';
+
+  atomRenderer=new THREE.WebGLRenderer({canvas:canvas,alpha:false,antialias:true});
+  atomRenderer.setClearColor(0x030710,1);
+  atomRenderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  atomRenderer.setSize(W,H);
+
+  atomScene=new THREE.Scene();
+  atomCamera=new THREE.PerspectiveCamera(45,W/H,0.1,200);
+
+  // Lighting
+  atomScene.add(new THREE.AmbientLight(0xffffff,0.45));
+  var dl1=new THREE.DirectionalLight(0x88aaff,1.1);dl1.position.set(5,8,5);atomScene.add(dl1);
+  var dl2=new THREE.DirectionalLight(0xff7744,0.3);dl2.position.set(-5,-3,-5);atomScene.add(dl2);
+
+  // Stars background
+  for(var s=0;s<120;s++){
+    var sm=new THREE.Mesh(new THREE.SphereGeometry(Math.random()*0.04+0.01,4,4),
+      new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:Math.random()*0.5+0.1}));
+    var rr=60;sm.position.set((Math.random()-0.5)*rr,(Math.random()-0.5)*rr,(Math.random()-0.5)*rr-20);
+    atomScene.add(sm);
+  }
+
+  var atomGroup=new THREE.Group();
+  atomScene.add(atomGroup);
+
+  // Nucleus color from element category
+  var nucleusColor=new THREE.Color(accentHex||'#4488ff');
+  var nucleusR=Math.max(0.28,Math.min(0.55,0.18+el.n*0.003));
+
+  // Nucleus — layered spheres for glow effect
+  var nucGeo=new THREE.SphereGeometry(nucleusR,32,32);
+  var nucMat=new THREE.MeshPhongMaterial({color:nucleusColor,emissive:nucleusColor,emissiveIntensity:0.55,shininess:130,specular:new THREE.Color('#ffffff')});
+  var nucMesh=new THREE.Mesh(nucGeo,nucMat);atomGroup.add(nucMesh);
+  // nucleus glow halo
+  var haloMat=new THREE.MeshBasicMaterial({color:nucleusColor,transparent:true,opacity:0.10,side:THREE.BackSide});
+  var haloMesh=new THREE.Mesh(new THREE.SphereGeometry(nucleusR*1.55,24,24),haloMat);atomGroup.add(haloMesh);
+
+  var shells=getElectronShells(el.n);
+  var shellColors=['#4a9aff','#44ddaa','#ffaa33','#ff5577','#aa88ff','#44ffff','#ffff55'];
+  var orbitGroups=[];
+
+  shells.forEach(function(eCount,si){
+    var radius=0.85+si*0.85;
+    var shellCol=new THREE.Color(shellColors[si]||'#aaaaff');
+
+    // Orbit ring — torus
+    var torusGeo=new THREE.TorusGeometry(radius,0.018,8,80);
+    var torusMat=new THREE.MeshBasicMaterial({color:shellCol,transparent:true,opacity:0.28});
+    var torus=new THREE.Mesh(torusGeo,torusMat);
+
+    // Tilt each shell for 3D look
+    var tiltX=[0, Math.PI/3, Math.PI/5, Math.PI*0.4, Math.PI/7, Math.PI*0.55, Math.PI/4];
+    var tiltZ=[0, Math.PI/6, Math.PI/3, Math.PI*0.15, Math.PI*0.45, Math.PI/5, Math.PI*0.35];
+    torus.rotation.x=tiltX[si]||0;
+    torus.rotation.z=tiltZ[si]||0;
+    atomGroup.add(torus);
+
+    // Electron spheres on this orbit
+    var orbitGrp=new THREE.Group();
+    orbitGrp.rotation.x=tiltX[si]||0;
+    orbitGrp.rotation.z=tiltZ[si]||0;
+    atomGroup.add(orbitGrp);
+
+    var eR=Math.max(0.065,0.11-si*0.008);
+    var eMat=new THREE.MeshPhongMaterial({color:shellCol,emissive:shellCol,emissiveIntensity:0.6,shininess:120});
+
+    for(var ei=0;ei<eCount;ei++){
+      var angle=(ei/eCount)*Math.PI*2;
+      var eHolder=new THREE.Object3D();
+      var eMesh=new THREE.Mesh(new THREE.SphereGeometry(eR,10,10),eMat);
+      eMesh.position.set(Math.cos(angle)*radius,0,Math.sin(angle)*radius);
+      eHolder.add(eMesh);
+      orbitGrp.add(eHolder);
+    }
+    orbitGroups.push({grp:orbitGrp,speed:0.012-si*0.0012,dir:(si%2===0?1:-1),eCount:eCount,radius:radius,shellIdx:si,angles:Array.from({length:eCount},function(_,i){return (i/eCount)*Math.PI*2;})});
+  });
+
+  var maxShellR=(shells.length)*0.85+0.85;
+  atomCamera.position.z=maxShellR*2.4+2.5;
+  atomRotX=0.3;atomRotY=0;
+  atomSpin=true;
+  var spinBtn=document.getElementById('ptAtomSpinBtn');
+  if(spinBtn)spinBtn.textContent='↻ Spin ON';
+
+  function anim(){
+    atomAnimId=requestAnimationFrame(anim);
+    // Rotate electrons along their orbits
+    orbitGroups.forEach(function(og){
+      var speed=og.speed*og.dir;
+      var eObjs=og.grp.children;
+      eObjs.forEach(function(holder,ei){
+        og.angles[ei]+=speed;
+        var a=og.angles[ei];
+        var child=holder.children[0];
+        if(child){child.position.set(Math.cos(a)*og.radius,0,Math.sin(a)*og.radius);}
+      });
+    });
+    if(atomSpin)atomRotY+=0.006;
+    atomGroup.rotation.x=atomRotX;
+    atomGroup.rotation.y=atomRotY;
+    atomRenderer.render(atomScene,atomCamera);
+  }
+  anim();
+
+  // Spin button
+  if(spinBtn){
+    spinBtn.onclick=function(){atomSpin=!atomSpin;this.textContent=atomSpin?'↻ Spin ON':'⏸ Spin OFF';};
+  }
+
+  // Drag to rotate
+  canvas.addEventListener('mousedown',function(e){atomDragging=true;atomPrevMx={x:e.clientX,y:e.clientY};atomSpin=false;var sb=document.getElementById('ptAtomSpinBtn');if(sb)sb.textContent='⏸ Spin OFF';});
+  document.addEventListener('mousemove',function(e){if(!atomDragging)return;atomRotY+=(e.clientX-atomPrevMx.x)*0.009;atomRotX+=(e.clientY-atomPrevMx.y)*0.009;atomPrevMx={x:e.clientX,y:e.clientY};});
+  document.addEventListener('mouseup',function(){atomDragging=false;});
+  canvas.addEventListener('wheel',function(e){if(atomCamera)atomCamera.position.z=Math.max(2,Math.min(30,atomCamera.position.z+e.deltaY*0.04));},{passive:true});
+  canvas.addEventListener('touchstart',function(e){atomDragging=true;atomPrevMx={x:e.touches[0].clientX,y:e.touches[0].clientY};atomSpin=false;},{passive:true});
+  canvas.addEventListener('touchmove',function(e){if(!atomDragging)return;atomRotY+=(e.touches[0].clientX-atomPrevMx.x)*0.009;atomRotX+=(e.touches[0].clientY-atomPrevMx.y)*0.009;atomPrevMx={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+  canvas.addEventListener('touchend',function(){atomDragging=false;},{passive:true});
+}
+
+var ptOpen=false,selEl=null;
+function togglePT(){
+  ptOpen=!ptOpen;
+  document.getElementById('ptBody').classList.toggle('open',ptOpen);
+  document.getElementById('ptChevron').classList.toggle('open',ptOpen);
+  document.getElementById('ptFolderIcon').textContent=ptOpen?'\uD83D\uDCC2':'\uD83D\uDCC1';
+  if(ptOpen&&!document.getElementById('ptTable').innerHTML)buildPT();
+}
+
+function buildPT(){
+  var legend=document.getElementById('ptLegend');
+  legend.innerHTML=Object.keys(PT_CATS).map(function(k){
+    return '<div class="pt-leg-item"><div class="pt-leg-dot" style="background:'+PT_CATS[k].b+';opacity:0.8"></div>'+k+'</div>';
+  }).join('');
+
+  var tbl=document.getElementById('ptTable');
+  var byGroup={};
+  ELEMENTS.forEach(function(el){
+    var key=el.period+'_'+el.group;
+    byGroup[key]=el;
+  });
+
+  var rows='';
+  for(var p=1;p<=7;p++){
+    rows+='<tr>';
+    for(var g=1;g<=18;g++){
+      var el=byGroup[p+'_'+g];
+      if(!el){rows+='<td class="pt-empty"></td>';continue;}
+      var cc=PT_CATS[el.cat]||{c:'#1a2a3a',b:'#4a6a9a'};
+      rows+='<td><div class="pt-cell" style="background:'+cc.c+';border-color:'+cc.b+'44;color:'+cc.b+'" onclick="selElFn('+el.n+')" title="'+el.name+'">'
+        +'<span class="pt-num">'+el.n+'</span>'
+        +'<span class="pt-sym">'+el.sym+'</span>'
+        +'<span class="pt-wt">'+el.mass+'</span>'
+        +'</div></td>';
+    }
+    rows+='</tr>';
+    if(p===6){rows+='<tr><td colspan="18" style="height:6px"></td></tr>';}
+  }
+  rows+='<tr><td colspan="3" style="height:4px"></td><td colspan="15"><div style="font-size:9px;color:#2a3a5a;padding:2px 4px;letter-spacing:0.5px;">Lanthanides (57-71) and Actinides (89-103) shown above in period rows</div></td></tr>';
+  tbl.innerHTML=rows;
+}
+
+function selElFn(n){
+  selEl=ELEMENTS.find(function(e){return e.n===n;});
+  document.querySelectorAll('.pt-cell').forEach(function(c){c.classList.remove('selected-el');});
+  var cells=document.querySelectorAll('.pt-cell');
+  cells.forEach(function(c){if(c.querySelector('.pt-num')&&c.querySelector('.pt-num').textContent==n)c.classList.add('selected-el');});
+  var el=selEl,cc=PT_CATS[el.cat]||{c:'#1a2a3a',b:'#4a6a9a'};
+  var phaseColor=el.phase==='Gas'?'#4488ff':el.phase==='Liquid'?'#44aaff':'#aabbcc';
+  // Build electron shell config
+  var shells=getElectronShells(el.n);
+  var shellLegend=shells.map(function(s,i){return '<div class="pt-shell-pill">Shell '+(i+1)+': '+s+' e⁻</div>';}).join('');
+
+  document.getElementById('ptDetail').innerHTML=
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;">'
+    +'<div style="font-size:52px;font-weight:700;color:'+cc.b+';line-height:1;min-width:64px;text-align:center;">'+el.sym+'</div>'
+    +'<div style="flex:1;min-width:160px;">'
+    +'<div style="font-size:17px;font-weight:600;color:#c8d8ff;">'+el.name+'</div>'
+    +'<div style="font-size:12px;color:#4a6aaa;margin-top:2px;">Atomic No. '+el.n+' &nbsp;&#183;&nbsp; Mass: '+el.mass+'</div>'
+    +'<div style="display:inline-block;font-size:10px;padding:2px 9px;border-radius:6px;margin-top:5px;background:'+cc.c+';color:'+cc.b+';border:1px solid '+cc.b+'55;">'+el.cat+'</div>'
+    +'</div></div>'
+    +'<div class="pt-props">'
+    +'<div class="pt-prop"><div class="pt-prop-label">Phase</div><div class="pt-prop-val" style="color:'+phaseColor+'">'+el.phase+'</div></div>'
+    +'<div class="pt-prop"><div class="pt-prop-label">Melting pt</div><div class="pt-prop-val">'+el.melt+'</div></div>'
+    +'<div class="pt-prop"><div class="pt-prop-label">Boiling pt</div><div class="pt-prop-val">'+el.boil+'</div></div>'
+    +'<div class="pt-prop"><div class="pt-prop-label">Density</div><div class="pt-prop-val">'+el.density+'</div></div>'
+    +'<div class="pt-prop"><div class="pt-prop-label">Period</div><div class="pt-prop-val">'+el.period+'</div></div>'
+    +'<div class="pt-prop"><div class="pt-prop-label">Group</div><div class="pt-prop-val">'+el.group+'</div></div>'
+    +'</div>'
+    +'<div class="pt-config">e⁻ config: '+el.config+'</div>'
+    +'<div class="pt-atom-viewer"><canvas class="pt-atom-canvas" id="ptAtomCanvas" height="220"></canvas>'
+    +'<div class="pt-atom-overlay"><span class="pt-atom-label">3D Atomic Model · drag to rotate</span>'
+    +'<div class="pt-atom-btns"><button class="pt-atom-btn" id="ptAtomSpinBtn">↻ Spin ON</button></div></div></div>'
+    +'<div class="pt-shell-legend">'+shellLegend+'</div>';
+
+  // Small delay so canvas is in DOM
+  requestAnimationFrame(function(){buildAtom3D(el,cc.b);});
+}
+
 </script>
 </body>
