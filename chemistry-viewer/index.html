@@ -47,7 +47,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 
 /* ===== APP ===== */
 #app{position:relative;z-index:1;padding-bottom:2rem;}
-.header{text-align:center;padding:1.8rem 1rem 0.8rem;background:linear-gradient(180deg,rgba(13,21,48,0.88) 0%,rgba(7,11,26,0) 100%);}
+.header{text-align:center;padding:1.8rem 1rem 0.8rem 3.8rem;background:linear-gradient(180deg,rgba(13,21,48,0.88) 0%,rgba(7,11,26,0) 100%);}
 .header h1{font-size:24px;font-weight:600;letter-spacing:1px;color:#c8d8ff;}
 .header p{font-size:12px;color:#5a7ab5;margin-top:5px;letter-spacing:0.5px;}
 .search-wrap{padding:0.6rem 1rem;}
@@ -112,19 +112,84 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .lp-dot{width:8px;height:8px;border-radius:50%;background:#ffcc44;border:1px solid #cc9900;display:inline-block;}
 
 
+/* ===== HAMBURGER + DRAWER ===== */
+#hamburgerBtn{
+  position:fixed;top:13px;left:13px;z-index:8000;
+  width:40px;height:40px;border-radius:10px;
+  background:rgba(8,14,35,0.92);border:1px solid #1e2d55;
+  backdrop-filter:blur(8px);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  transition:all 0.2s;
+}
+#hamburgerBtn:hover{border-color:#3a5aad;background:rgba(16,26,58,0.97);}
+.hb-line{
+  width:18px;height:2px;border-radius:2px;
+  background:#7aaaf5;transition:all 0.3s ease;transform-origin:center;
+}
+#hamburgerBtn.open .hb-line:nth-child(1){transform:translateY(7px) rotate(45deg);}
+#hamburgerBtn.open .hb-line:nth-child(2){opacity:0;transform:scaleX(0);}
+#hamburgerBtn.open .hb-line:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+#drawerOverlay{
+  position:fixed;inset:0;z-index:7000;
+  background:rgba(2,6,18,0.55);backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+#drawerOverlay.open{opacity:1;pointer-events:all;}
+
+#ptDrawer{
+  position:fixed;top:0;left:0;bottom:0;z-index:7500;
+  width:min(92vw,560px);
+  background:rgba(7,11,26,0.98);border-right:1px solid #1e2d55;
+  backdrop-filter:blur(14px);
+  transform:translateX(-100%);transition:transform 0.32s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+#ptDrawer.open{transform:translateX(0);}
+
+#drawerHeader{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 14px 12px;border-bottom:1px solid #1a2540;flex-shrink:0;
+}
+#drawerTitle{font-size:13px;font-weight:700;color:#8aaccc;flex:1;letter-spacing:0.3px;}
+#drawerCloseBtn{
+  width:28px;height:28px;border-radius:8px;border:1px solid #1a2540;
+  background:transparent;color:#3a5a80;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;
+}
+#drawerCloseBtn:hover{border-color:#3a5aad;color:#7aaaf5;}
+#drawerBody{flex:1;overflow-y:auto;padding:10px 8px 24px;scrollbar-width:thin;scrollbar-color:#1e2d55 transparent;}
+#drawerBody::-webkit-scrollbar{width:4px;}
+#drawerBody::-webkit-scrollbar-thumb{background:#1e2d55;border-radius:4px;}
+
+/* Drawer folder rows */
+.drawer-folder{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:9px;cursor:pointer;
+  transition:background 0.15s;user-select:none;
+}
+.drawer-folder:hover{background:rgba(58,90,173,0.15);}
+.drawer-folder-icon{display:flex;align-items:center;flex-shrink:0;}
+.drawer-folder-label{font-size:12px;font-weight:600;color:#a8c0f0;flex:1;}
+.drawer-folder-chevron{font-size:9px;color:#3a5a80;transition:transform 0.25s;}
+.drawer-folder-chevron.open{transform:rotate(90deg);}
+.drawer-subfolder-body{overflow:hidden;max-height:0;transition:max-height 0.3s ease;}
+.drawer-subfolder-body.open{max-height:400px;}
+.drawer-item{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 10px 7px 28px;border-radius:8px;cursor:pointer;
+  transition:all 0.15s;user-select:none;margin-top:1px;
+}
+.drawer-item:hover{background:rgba(74,122,255,0.12);}
+.drawer-item.active{background:rgba(74,122,255,0.16);border-left:2px solid #4a7aff;padding-left:26px;}
+.drawer-item-icon{font-size:12px;display:flex;align-items:center;flex-shrink:0;width:16px;}
+.drawer-item-label{font-size:12px;color:#7a9ac0;}
+.drawer-item.active .drawer-item-label{color:#a8c8ff;font-weight:600;}
+
 /* ===== PERIODIC TABLE ===== */
 .pt-section{margin:0 1rem 2rem;}
-.pt-folder-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(12,20,44,0.92);border:1px solid #1e2d55;border-radius:12px;cursor:pointer;transition:all 0.2s;user-select:none;}
-.pt-folder-btn:hover{border-color:#3a5aad;background:rgba(16,26,58,0.95);}
-.pt-folder-icon{font-size:18px;display:flex;align-items:center;flex-shrink:0;}
-.pt-folder-icon svg{transition:transform 0.5s ease;}
-.pt-folder-btn:hover .pt-folder-icon svg{transform:rotate(30deg) scale(1.1);}
-.pt-folder-label{font-size:14px;font-weight:600;color:#c8d8ff;flex:1;}
-.pt-folder-sub{font-size:11px;color:#3a5a80;}
-.pt-chevron{font-size:11px;color:#3a5a80;transition:transform 0.3s;}
-.pt-chevron.open{transform:rotate(180deg);}
-.pt-body{display:none;padding:12px 0 0;}
-.pt-body.open{display:block;}
+
+
 .pt-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
 .pt-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#4a6a9a;}
 .pt-leg-dot{width:10px;height:10px;border-radius:3px;}
@@ -205,63 +270,105 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
   </div>
 </div>
 
-<div id="app">
-  <div class="header">
-    <h1>⚗ Chemistry 3D Molecule Viewer</h1>
-    <p>Click molecule to view in 3D &nbsp;|&nbsp; Double-click or tap ⛶ for fullscreen</p>
+<!-- HAMBURGER BUTTON — fixed top-left -->
+<button id="hamburgerBtn" onclick="toggleDrawer()" title="Menu">
+  <div class="hb-line"></div>
+  <div class="hb-line"></div>
+  <div class="hb-line"></div>
+</button>
+
+<!-- DRAWER OVERLAY -->
+<div id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- SIDE DRAWER -->
+<div id="ptDrawer">
+  <div id="drawerHeader">
+    <div id="drawerTitle">📁 My Projects</div>
+    <button id="drawerCloseBtn" onclick="closeDrawer()">✕</button>
   </div>
-  <!-- PERIODIC TABLE SECTION — TOP -->
-  <div class="pt-section" id="ptSection">
-    <div class="pt-folder-btn" id="ptFolderBtn" onclick="togglePT()">
-      <span class="pt-folder-icon" id="ptFolderIcon">
-        <svg id="ptIconSvg" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Atom nucleus -->
+  <div id="drawerBody">
+
+    <!-- Subfolder: Chemistry 3D Viewer -->
+    <div class="drawer-folder" id="drawerFolder1" onclick="toggleFolder('drawerFolder1')">
+      <span class="drawer-folder-icon">
+        <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
           <circle cx="14" cy="14" r="2.6" fill="#7aaaf5" opacity="0.95"/>
-          <!-- Orbit 1 — horizontal ellipse -->
-          <ellipse cx="14" cy="14" rx="10" ry="3.5" stroke="#4a7aff" stroke-width="1.3" fill="none" opacity="0.7"/>
-          <!-- Orbit 2 — tilted 60° -->
-          <ellipse cx="14" cy="14" rx="10" ry="3.5" stroke="#44ddaa" stroke-width="1.3" fill="none" opacity="0.65" transform="rotate(60 14 14)"/>
-          <!-- Orbit 3 — tilted 120° -->
-          <ellipse cx="14" cy="14" rx="10" ry="3.5" stroke="#aa88ff" stroke-width="1.3" fill="none" opacity="0.65" transform="rotate(120 14 14)"/>
-          <!-- Electron dots -->
+          <ellipse cx="14" cy="14" rx="10" ry="3.5" stroke="#4a7aff" stroke-width="1.4" fill="none" opacity="0.75"/>
+          <ellipse cx="14" cy="14" rx="10" ry="3.5" stroke="#44ddaa" stroke-width="1.4" fill="none" opacity="0.7" transform="rotate(60 14 14)"/>
+          <ellipse cx="14" cy="14" rx="10" ry="3.5" stroke="#aa88ff" stroke-width="1.4" fill="none" opacity="0.7" transform="rotate(120 14 14)"/>
           <circle cx="24" cy="14" r="1.5" fill="#4a7aff" opacity="0.9"/>
           <circle cx="7.5" cy="8" r="1.5" fill="#44ddaa" opacity="0.9"/>
           <circle cx="7.5" cy="20" r="1.5" fill="#aa88ff" opacity="0.9"/>
         </svg>
       </span>
-      <span class="pt-folder-label">Periodic Table</span>
-      <span class="pt-folder-sub">118 elements &nbsp;&#183;&nbsp; Click any element to explore</span>
-      <span class="pt-chevron" id="ptChevron">&#9660;</span>
+      <span class="drawer-folder-label">Chemistry 3D Viewer</span>
+      <span class="drawer-folder-chevron" id="chevron-drawerFolder1">▶</span>
     </div>
-    <div class="pt-body" id="ptBody">
+    <div class="drawer-subfolder-body" id="body-drawerFolder1">
+      <!-- Sub-item: Molecule Viewer -->
+      <div class="drawer-item active" id="nav-molecules" onclick="navTo('molecules')">
+        <span class="drawer-item-icon">⚗</span>
+        <span class="drawer-item-label">Molecule Viewer</span>
+      </div>
+      <!-- Sub-item: Periodic Table -->
+      <div class="drawer-item" id="nav-periodic" onclick="navTo('periodic')">
+        <span class="drawer-item-icon">
+          <svg width="14" height="14" viewBox="0 0 28 28" fill="none">
+            <rect x="3" y="3" width="9" height="9" rx="2" fill="#4a7aff" opacity="0.7"/>
+            <rect x="16" y="3" width="9" height="9" rx="2" fill="#44ddaa" opacity="0.7"/>
+            <rect x="3" y="16" width="9" height="9" rx="2" fill="#aa88ff" opacity="0.7"/>
+            <rect x="16" y="16" width="9" height="9" rx="2" fill="#ffaa33" opacity="0.7"/>
+          </svg>
+        </span>
+        <span class="drawer-item-label">Periodic Table</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="header">
+    <h1 id="appTitle">⚗ Chemistry 3D Molecule Viewer</h1>
+    <p id="appSubtitle">Click molecule to view in 3D &nbsp;|&nbsp; Double-click or tap ⛶ for fullscreen</p>
+  </div>
+
+  <!-- PAGE: MOLECULES -->
+  <div id="pageMolecules">
+    <div class="search-wrap"><input type="text" id="searchInput" placeholder="Search by name, formula or category..."></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="mol-count" id="molCount"></div>
+    <div class="grid-wrap"><div class="mol-grid" id="molGrid"></div></div>
+    <div class="viewer-wrap">
+      <div class="viewer-box">
+        <canvas id="mainCanvas"></canvas>
+        <div class="zoom-btns">
+          <button class="zoom-btn" id="zoomIn" title="Zoom In">+</button>
+          <button class="zoom-btn" id="zoomOut" title="Zoom Out">−</button>
+          <button class="zoom-btn" id="zoomReset" title="Reset" style="font-size:13px;">↺</button>
+        </div>
+        <div class="viewer-overlay">
+          <div class="ctrl-hint">Drag to rotate &nbsp;|&nbsp; Scroll or +/− to zoom</div>
+          <div class="viewer-btns">
+            <button class="spin-btn" id="spinBtn">↻ Auto Spin ON</button>
+            <button class="expand-btn" id="expandBtn">⛶ Fullscreen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mol-info-box" id="molInfo"></div>
+  </div>
+
+  <!-- PAGE: PERIODIC TABLE -->
+  <div id="pagePeriodic" style="display:none;">
+    <div style="padding:0.8rem 1rem 0.4rem;">
+      <div style="font-size:13px;color:#5a7ab5;margin-bottom:12px;letter-spacing:0.3px;">118 elements · click any to explore</div>
       <div class="pt-legend" id="ptLegend"></div>
       <div class="pt-grid"><table class="pt-table" id="ptTable"></table></div>
       <div class="pt-detail" id="ptDetail"><div class="pt-detail-empty">Click any element to see details</div></div>
     </div>
   </div>
-
-  <div class="search-wrap"><input type="text" id="searchInput" placeholder="Search by name, formula or category..."></div>
-  <div class="tabs" id="tabs"></div>
-  <div class="mol-count" id="molCount"></div>
-  <div class="grid-wrap"><div class="mol-grid" id="molGrid"></div></div>
-  <div class="viewer-wrap">
-    <div class="viewer-box">
-      <canvas id="mainCanvas"></canvas>
-      <div class="zoom-btns">
-        <button class="zoom-btn" id="zoomIn" title="Zoom In">+</button>
-        <button class="zoom-btn" id="zoomOut" title="Zoom Out">−</button>
-        <button class="zoom-btn" id="zoomReset" title="Reset" style="font-size:13px;">↺</button>
-      </div>
-      <div class="viewer-overlay">
-        <div class="ctrl-hint">Drag to rotate &nbsp;|&nbsp; Scroll or +/− to zoom</div>
-        <div class="viewer-btns">
-          <button class="spin-btn" id="spinBtn">↻ Auto Spin ON</button>
-          <button class="expand-btn" id="expandBtn">⛶ Fullscreen</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="mol-info-box" id="molInfo"></div>
 
 </div>
 
@@ -566,7 +673,7 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 
 document.getElementById('expandBtn').onclick=openModal;
 document.getElementById('modalClose').onclick=closeModal;
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();if(drawerOpen)closeDrawer();}});
 document.getElementById('modalSpinBtn').onclick=function(){modalSpin=!modalSpin;this.textContent=modalSpin?'\u21BB Auto Spin ON':'\u23F8 Auto Spin OFF';};
 document.getElementById('mZoomIn').onclick=function(){if(modalCamera)modalCamera.position.z=Math.max(3,modalCamera.position.z-2);};
 document.getElementById('mZoomOut').onclick=function(){if(modalCamera)modalCamera.position.z=Math.min(70,modalCamera.position.z+2);};
@@ -871,13 +978,57 @@ function buildAtom3D(el,accentHex){
   canvas.addEventListener('touchend',function(){atomDragging=false;},{passive:true});
 }
 
-var ptOpen=false,selEl=null;
-function togglePT(){
-  ptOpen=!ptOpen;
-  document.getElementById('ptBody').classList.toggle('open',ptOpen);
-  document.getElementById('ptChevron').classList.toggle('open',ptOpen);
-  if(ptOpen&&!document.getElementById('ptTable').innerHTML)buildPT();
+var drawerOpen=false;
+function toggleDrawer(){drawerOpen?closeDrawer():openDrawer();}
+function openDrawer(){
+  drawerOpen=true;
+  document.getElementById('hamburgerBtn').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('ptDrawer').classList.add('open');
+  // Auto-expand the Chemistry folder on first open
+  if(!document.getElementById('body-drawerFolder1').classList.contains('open')){
+    toggleFolder('drawerFolder1');
+  }
 }
+function closeDrawer(){
+  drawerOpen=false;
+  document.getElementById('hamburgerBtn').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('ptDrawer').classList.remove('open');
+}
+
+function toggleFolder(id){
+  var body=document.getElementById('body-'+id);
+  var chev=document.getElementById('chevron-'+id);
+  var isOpen=body.classList.toggle('open');
+  chev.classList.toggle('open',isOpen);
+}
+
+var currentPage='molecules';
+function navTo(page){
+  // Update active state in drawer
+  document.querySelectorAll('.drawer-item').forEach(function(el){el.classList.remove('active');});
+  var navEl=document.getElementById('nav-'+page);
+  if(navEl)navEl.classList.add('active');
+
+  // Show/hide pages
+  document.getElementById('pageMolecules').style.display = page==='molecules' ? '' : 'none';
+  document.getElementById('pagePeriodic').style.display  = page==='periodic'  ? '' : 'none';
+
+  // Update header
+  if(page==='molecules'){
+    document.getElementById('appTitle').textContent='⚗ Chemistry 3D Molecule Viewer';
+    document.getElementById('appSubtitle').textContent='Click molecule to view in 3D | Double-click or tap ⛶ for fullscreen';
+  } else if(page==='periodic'){
+    document.getElementById('appTitle').textContent='🔬 Periodic Table';
+    document.getElementById('appSubtitle').textContent='118 elements · click any element to explore in 3D';
+    if(!document.getElementById('ptTable').innerHTML)buildPT();
+  }
+
+  currentPage=page;
+  closeDrawer();
+}
+var selEl=null;
 
 function buildPT(){
   var legend=document.getElementById('ptLegend');
