@@ -117,6 +117,36 @@
 </head>
 <body>
 
+<script>
+/* ═══════════ SECURITY PROTECTION ═══════════ */
+(function(){
+  document.addEventListener("contextmenu",function(e){e.preventDefault();return false;});
+  document.addEventListener("keydown",function(e){
+    if(e.keyCode===123){e.preventDefault();return false;}
+    if(e.ctrlKey&&e.keyCode===85){e.preventDefault();return false;}
+    if(e.ctrlKey&&e.shiftKey&&e.keyCode===73){e.preventDefault();return false;}
+    if(e.ctrlKey&&e.shiftKey&&e.keyCode===74){e.preventDefault();return false;}
+    if(e.ctrlKey&&e.shiftKey&&e.keyCode===67){e.preventDefault();return false;}
+    if(e.ctrlKey&&e.keyCode===83){e.preventDefault();return false;}
+    if(e.ctrlKey&&e.keyCode===65){e.preventDefault();return false;}
+    if(e.ctrlKey&&e.keyCode===80){e.preventDefault();return false;}
+  });
+  document.addEventListener("selectstart",function(e){e.preventDefault();return false;});
+  document.addEventListener("dragstart",function(e){e.preventDefault();return false;});
+  (function devToolsDetect(){
+    const threshold=160;let devOpen=false;
+    setInterval(function(){
+      const w=window.outerWidth-window.innerWidth>threshold;
+      const h=window.outerHeight-window.innerHeight>threshold;
+      if((w||h)&&!devOpen){devOpen=true;document.body.innerHTML="<div style=\"display:flex;align-items:center;justify-content:center;height:100vh;background:#020408;font-family:monospace;color:#ff4455;font-size:1.2rem;letter-spacing:3px;\">🔒 ACCESS RESTRICTED<\/div>";}
+      if(!w&&!h){devOpen=false;}
+    },1000);
+  })();
+  console.log("%c© 2025 Deepesh Kumar — All Rights Reserved","color:#ffd700;font-size:14px;font-weight:bold;");
+  console.log("%cThis content is protected. Unauthorized copying is prohibited.","color:#ff4455;font-size:11px;");
+})();
+</script>
+
 <header>
   <div class="tag">Organic Chemistry · 3D Interactive Lab</div>
   <h1>Inductive · Hyperconjugation · Resonance</h1>
