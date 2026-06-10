@@ -19,7 +19,7 @@
   .tag { font-family:'Orbitron',monospace; font-size:0.6rem; letter-spacing:4px; color:var(--gold-dim); text-transform:uppercase; margin-bottom:0.4rem; }
   header h1 { font-family:'Orbitron',monospace; font-size:clamp(1.3rem,4vw,2.6rem); font-weight:900; background:linear-gradient(135deg,var(--gold) 0%,#fff8dc 50%,var(--gold) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:2px; }
   header p.sub { font-size:0.95rem; color:rgba(200,220,255,0.5); margin-top:0.3rem; letter-spacing:1px; }
-  #three-wrap { position:relative; width:100%; max-width:960px; margin:0.8rem auto 0; aspect-ratio:16/9; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#020408; }
+  #three-wrap { position:relative; width:100%; max-width:960px; margin:0.8rem auto 0; aspect-ratio:16/9; min-height:300px; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#020408; }
   #three-wrap canvas { display:block; width:100%!important; height:100%!important; }
   .corner { position:absolute; width:18px; height:18px; border-color:var(--gold-dim); border-style:solid; opacity:0.5; pointer-events:none; }
   .corner.tl{top:0;left:0;border-width:2px 0 0 2px;border-radius:4px 0 0 0;}
@@ -268,6 +268,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+  if (typeof THREE === 'undefined') {
+    document.write('<script src="https://unpkg.com/three@0.128.0/build/three.min.js"><\/script>');
+  }
+</script>
+<script>
 /* ═══════════ PROTECTION ═══════════ */
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
@@ -301,9 +306,10 @@ const SHELLS = [
 
 /* ═══════════ RENDERER ═══════════ */
 const wrap = document.getElementById('three-wrap');
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(window.devicePixelRatio);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
+renderer.setSize(wrap.offsetWidth || 960, wrap.offsetHeight || 540);
 wrap.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -315,12 +321,14 @@ camera.position.set(0, 8, 22);
 camera.lookAt(0,0,0);
 
 function resizeRenderer() {
-  const w = wrap.clientWidth, h = wrap.clientHeight;
+  const w = wrap.clientWidth || wrap.offsetWidth || 960;
+  const h = wrap.clientHeight || wrap.offsetHeight || 540;
   renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
-resizeRenderer();
+// Defer resize until after DOM is painted so clientWidth/Height are correct
+requestAnimationFrame(() => { resizeRenderer(); });
 window.addEventListener('resize', resizeRenderer);
 
 /* ═══════════ LIGHTING ═══════════ */
