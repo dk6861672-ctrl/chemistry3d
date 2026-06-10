@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organic Chemistry Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+  :root {
+    --gold: #ffd700;
+    --gold-dim: #b8960c;
+    --bg: #020408;
+    --panel: rgba(10,20,40,0.92);
+    --border: rgba(255,215,0,0.18);
+    --text: #e8f0ff;
+    --accent: #00cfff;
+    --green: #44ffaa;
+    --red: #ff4422;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARFIELD ── */
+  #stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 3rem 1rem 1.5rem;
+  }
+  .back-btn {
+    position: absolute;
+    left: 1.5rem;
+    top: 2rem;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: var(--gold-dim);
+    text-decoration: none;
+    border: 1px solid rgba(255,215,0,0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .back-btn:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(255,215,0,0.05); }
+
+  .tag {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 5px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  header h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.6rem, 5vw, 3rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold) 0%, #fff8dc 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+    line-height: 1.2;
+  }
+  header p.sub {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    color: rgba(200,220,255,0.45);
+    letter-spacing: 1px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    margin: 1.5rem auto;
+  }
+
+  /* ── GRID ── */
+  .grid {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1.2rem 4rem;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.6rem;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,215,0,0.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .card:hover { border-color: rgba(255,215,0,0.4); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .card:hover::before { opacity: 1; }
+
+  .card.coming-soon {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .card-icon {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+  .card-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 3px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .card h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-bottom: 0.6rem;
+    line-height: 1.4;
+  }
+  .card p {
+    font-size: 0.88rem;
+    color: rgba(200,220,255,0.6);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .badge {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.48rem;
+    letter-spacing: 2px;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge.free { border: 1px solid rgba(0,207,255,0.4); color: var(--accent); }
+  .badge.soon { border: 1px solid rgba(255,215,0,0.25); color: var(--gold-dim); }
+
+  .card-arrow {
+    position: absolute;
+    bottom: 1.4rem;
+    right: 1.4rem;
+    font-size: 1rem;
+    color: var(--gold-dim);
+    transition: all 0.2s;
+  }
+  .card:hover .card-arrow { color: var(--gold); transform: translateX(4px); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    padding: 1rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .stat { text-align: center; }
+  .stat .sval {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+  }
+  .stat .slabel {
+    font-size: 0.65rem;
+    color: rgba(200,220,255,0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.75rem;
+    color: rgba(200,220,255,0.2);
+    letter-spacing: 1px;
+    border-top: 1px solid rgba(255,215,0,0.06);
+  }
+  footer a { color: rgba(255,215,0,0.35); text-decoration: none; }
+  footer a:hover { color: var(--gold-dim); }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<header>
+  <a href="../index.html" class="back-btn">← Home</a>
+  <div class="tag">⚗ Organic Chemistry · 3D Lab</div>
+  <h1>🧬 ORGANIC CHEMISTRY</h1>
+  <p class="sub">Interactive organic chemistry simulations — explore mechanisms, effects, and structures</p>
+</header>
+
+<div class="divider"></div>
+
+<!-- Stats -->
+<div class="stats-bar" style="position:relative;z-index:10;margin-bottom:2rem;">
+  <div class="stat">
+    <span class="sval" id="total-count">4</span>
+    <span class="slabel">Total</span>
+  </div>
+  <div class="stat">
+    <span class="sval" style="color:var(--accent)">1</span>
+    <span class="slabel">Live</span>
+  </div>
+  <div class="stat">
+    <span class="sval" style="color:var(--gold-dim)">3</span>
+    <span class="slabel">Coming Soon</span>
+  </div>
+</div>
+
+<!-- Cards Grid -->
+<div class="grid">
+
+  <!-- TOPIC 01 — LIVE -->
+  <a class="card" href="organic-effects.html">
+    <span class="card-icon">⚡</span>
+    <div class="card-number">Topic · 01</div>
+    <h2>Inductive, Hyperconjugation & Resonance Effects</h2>
+    <p>3D interactive visualization of organic electron effects. Explore inductive effect, hyperconjugation, and resonance with live electron flow animations.</p>
+    <span class="badge free">● Live</span>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <!-- TOPIC 02 — COMING SOON -->
+  <div class="card coming-soon">
+    <span class="card-icon">🔗</span>
+    <div class="card-number">Topic · 02</div>
+    <h2>Reaction Mechanisms</h2>
+    <p>Step-by-step 3D visualization of SN1, SN2, E1, E2 and addition reaction mechanisms with electron movement.</p>
+    <span class="badge soon">● Soon</span>
+  </div>
+
+  <!-- TOPIC 03 — COMING SOON -->
+  <div class="card coming-soon">
+    <span class="card-icon">🧪</span>
+    <div class="card-number">Topic · 03</div>
+    <h2>Functional Groups 3D</h2>
+    <p>Interactive 3D models of all major functional groups — alcohols, aldehydes, ketones, carboxylic acids, amines and more.</p>
+    <span class="badge soon">● Soon</span>
+  </div>
+
+  <!-- TOPIC 04 — COMING SOON -->
+  <div class="card coming-soon">
+    <span class="card-icon">🔄</span>
+    <div class="card-number">Topic · 04</div>
+    <h2>Isomerism & Stereochemistry</h2>
+    <p>Visualize structural, geometric, and optical isomers in 3D. Explore chirality, enantiomers, and diastereomers interactively.</p>
+    <span class="badge soon">● Soon</span>
+  </div>
+
+</div>
+
+<footer>
+  Chemistry 3D Lab · Organic Chemistry Hub &nbsp;|&nbsp; <a href="../index.html">← Back to Home</a> &nbsp;|&nbsp; © 2025 Deepesh Kumar
+</footer>
+
+<script>
+/* ── STARFIELD ── */
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+for (let i = 0; i < 160; i++) {
+  stars.push({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random() * 1.2 + 0.2,
+    a: Math.random(),
+    speed: Math.random() * 0.004 + 0.001
+  });
+}
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.a += s.speed;
+    const alpha = 0.2 + Math.sin(s.a) * 0.2;
+    ctx.beginPath();
+    ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,220,255,${alpha})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+</script>
+</body>
+</html>
