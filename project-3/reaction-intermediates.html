@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Reactive Intermediates — 3D Interactive</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+  :root {
+    --gold:#ffd700;--gold-dim:#b8960c;--bg:#020408;
+    --panel:rgba(10,20,40,0.92);--border:rgba(255,215,0,0.18);
+    --text:#e8f0ff;--accent:#00cfff;--red:#ff4455;--green:#44ffaa;
+    --violet:#cc44ff;--orange:#ff8844;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;}
+  html,body{touch-action:pan-y;overflow-x:hidden;}
+  body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);min-height:100vh;}
+  header{text-align:center;padding:2rem 1rem 0.8rem;position:relative;z-index:10;}
+  .back-btn{position:absolute;left:1.2rem;top:1.5rem;font-family:'Orbitron',monospace;font-size:0.5rem;letter-spacing:2px;color:var(--gold-dim);text-decoration:none;border:1px solid rgba(255,215,0,0.2);padding:0.4rem 0.9rem;border-radius:6px;transition:all 0.2s;}
+  .back-btn:hover{color:var(--gold);border-color:var(--gold-dim);}
+  .tag{font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase;margin-bottom:0.4rem;}
+  header h1{font-family:'Orbitron',monospace;font-size:clamp(1.1rem,3.5vw,2.3rem);font-weight:900;background:linear-gradient(135deg,var(--gold) 0%,#fff8dc 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;}
+  header p.sub{font-size:0.95rem;color:rgba(200,220,255,0.5);margin-top:0.3rem;letter-spacing:1px;}
+
+  #three-wrap{
+    position:relative;width:100%;max-width:960px;margin:0.8rem auto 0;
+    aspect-ratio:16/9;border:1px solid var(--border);border-radius:12px;
+    overflow:hidden;background:#020408;
+    cursor:grab;touch-action:none;
+  }
+  #three-wrap.dragging{cursor:grabbing;}
+  #three-wrap canvas{display:block;width:100%!important;height:100%!important;}
+
+  .corner{position:absolute;width:18px;height:18px;border-color:var(--gold-dim);border-style:solid;opacity:0.5;pointer-events:none;}
+  .corner.tl{top:0;left:0;border-width:2px 0 0 2px;border-radius:4px 0 0 0;}
+  .corner.tr{top:0;right:0;border-width:2px 2px 0 0;border-radius:0 4px 0 0;}
+  .corner.bl{bottom:0;left:0;border-width:0 0 2px 2px;border-radius:0 0 0 4px;}
+  .corner.br{bottom:0;right:0;border-width:0 2px 2px 0;border-radius:0 0 4px 0;}
+
+  #hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:0.42rem;letter-spacing:2px;color:rgba(255,215,0,0.35);pointer-events:none;white-space:nowrap;}
+  #int-label{position:absolute;top:12px;right:14px;font-family:'Orbitron',monospace;font-size:0.55rem;letter-spacing:2px;color:var(--accent);background:rgba(0,10,25,0.85);border:1px solid rgba(0,207,255,0.3);border-radius:6px;padding:0.35rem 0.7rem;pointer-events:none;opacity:0;transition:opacity 0.4s;}
+  #int-label.visible{opacity:1;}
+  #current-type{position:absolute;top:12px;left:14px;font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--gold);background:rgba(0,10,25,0.85);border:1px solid rgba(255,215,0,0.3);border-radius:6px;padding:0.35rem 0.9rem;pointer-events:none;}
+  #rot-indicator{position:absolute;bottom:32px;right:14px;font-family:'Orbitron',monospace;font-size:0.45rem;letter-spacing:2px;color:rgba(255,215,0,0.6);background:rgba(0,0,0,0.5);border-radius:4px;padding:0.25rem 0.55rem;pointer-events:none;opacity:0;transition:opacity 0.3s;}
+  #rot-indicator.vis{opacity:1;}
+
+  #controls{display:flex;flex-wrap:wrap;gap:0.6rem;justify-content:center;padding:0.8rem 1rem 0.4rem;max-width:960px;margin:0 auto;}
+  .btn{font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:2px;padding:0.5rem 1.1rem;border:1px solid var(--gold-dim);background:transparent;color:var(--gold);border-radius:6px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+  .btn:hover{background:rgba(255,215,0,0.08);border-color:var(--gold);}
+  .btn.active{background:rgba(255,215,0,0.15);border-color:var(--gold);color:#fff;}
+  .btn.accent{border-color:var(--accent);color:var(--accent);}
+  .btn.accent:hover{background:rgba(0,207,255,0.1);}
+  .btn.violet{border-color:var(--violet);color:var(--violet);}
+  .btn.violet:hover{background:rgba(204,68,255,0.1);}
+  .btn.green{border-color:var(--green);color:var(--green);}
+  .btn.green:hover{background:rgba(68,255,170,0.1);}
+  #speed-wrap{display:flex;align-items:center;gap:0.5rem;font-family:'Orbitron',monospace;font-size:0.52rem;color:var(--gold-dim);letter-spacing:2px;}
+  input[type=range]{-webkit-appearance:none;width:90px;height:3px;background:rgba(255,215,0,0.2);border-radius:2px;outline:none;cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);cursor:pointer;}
+
+  #int-selector{max-width:960px;margin:0.8rem auto 0;padding:0 1rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;justify-content:center;}
+  .int-btn{font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:2px;padding:0.45rem 1.4rem;border:1px solid rgba(255,215,0,0.25);background:transparent;color:rgba(255,215,0,0.6);border-radius:6px;cursor:pointer;transition:all 0.25s;}
+  .int-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,0.07);}
+  .int-btn.sel{border-color:var(--accent);color:var(--accent);background:rgba(0,207,255,0.12);}
+  .int-label{font-family:'Orbitron',monospace;font-size:0.52rem;color:var(--gold-dim);letter-spacing:2px;}
+
+  #live-stats{display:flex;gap:1.5rem;justify-content:center;padding:0.7rem 1rem;max-width:960px;margin:0.6rem auto 0;background:var(--panel);border:1px solid var(--border);border-radius:10px;flex-wrap:wrap;}
+  .live-item{text-align:center;}
+  .live-item .lval{font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:700;display:block;}
+  .lval.gold{color:var(--gold);}.lval.blue{color:var(--accent);}.lval.red{color:#ff6644;}.lval.green{color:var(--green);}.lval.violet{color:var(--violet);}.lval.orange{color:var(--orange);}
+  .live-item .llabel{font-size:0.62rem;color:rgba(200,220,255,0.4);letter-spacing:2px;text-transform:uppercase;}
+
+  #legend{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;padding:0.5rem 1rem;max-width:960px;margin:0.6rem auto 0;font-size:0.78rem;color:rgba(200,220,255,0.55);}
+  .leg-item{display:flex;align-items:center;gap:0.35rem;}
+  .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+  #info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;max-width:960px;margin:1rem auto 0;padding:0 1rem;}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;backdrop-filter:blur(8px);}
+  .panel h3{font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:3px;color:var(--gold);margin-bottom:0.6rem;text-transform:uppercase;}
+  .panel p{font-size:0.88rem;line-height:1.65;color:rgba(200,220,255,0.72);font-weight:300;}
+  .stat-row{display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0;border-bottom:1px solid rgba(255,215,0,0.06);font-size:0.82rem;}
+  .stat-row:last-child{border-bottom:none;}
+  .stat-row .label{color:rgba(200,220,255,0.5);font-weight:300;}
+  .stat-row .val{color:var(--gold);font-family:'Orbitron',monospace;font-size:0.65rem;}
+
+  #theory{max-width:960px;margin:1rem auto 0;padding:0 1rem 3rem;}
+  #theory h2{font-family:'Orbitron',monospace;font-size:0.7rem;letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase;margin-bottom:1rem;text-align:center;}
+  .accordion{background:var(--panel);border:1px solid var(--border);border-radius:10px;margin-bottom:0.5rem;overflow:hidden;}
+  .acc-head{padding:0.9rem 1.3rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;transition:background 0.2s;}
+  .acc-head:hover{background:rgba(255,215,0,0.05);}
+  .acc-head .arrow{transition:transform 0.3s;font-size:0.8rem;color:var(--gold-dim);}
+  .acc-head.open .arrow{transform:rotate(180deg);}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease;padding:0 1.3rem;font-size:0.88rem;line-height:1.75;color:rgba(200,220,255,0.72);font-weight:300;}
+  .acc-body.open{max-height:900px;padding:0 1.3rem 1.1rem;}
+  .acc-body ul{padding-left:1.1rem;margin-top:0.5rem;}
+  .acc-body li{margin-bottom:0.4rem;}
+  .acc-body strong{color:var(--gold);font-weight:600;}
+  .acc-body em{color:var(--accent);font-style:italic;}
+  .formula-box{color:var(--gold);font-family:'Orbitron',monospace;font-size:0.72rem;text-align:center;padding:0.6rem;border:1px solid rgba(255,215,0,0.25);border-radius:6px;margin:0.5rem 0;letter-spacing:1px;}
+  footer{text-align:center;padding:1.5rem 1rem;font-size:0.75rem;color:rgba(200,220,255,0.25);letter-spacing:1px;}
+  footer span{color:var(--gold-dim);}
+  ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:#020408;}::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:3px;}
+  *{-webkit-user-select:none!important;-moz-user-select:none!important;user-select:none!important;}
+  @media print{body{display:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="back-btn">← Back</a>
+  <div class="tag">Organic Chemistry · Reaction Mechanism</div>
+  <h1>Reactive Intermediates</h1>
+  <p class="sub">3D Interactive Simulation · Carbocation · Carbanion · Free Radical</p>
+</header>
+
+<div id="three-wrap">
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+  <div id="int-label">INTERMEDIATE FORMING</div>
+  <div id="current-type">CARBOCATION — sp²</div>
+  <div id="rot-indicator">FREE ROTATE</div>
+  <div id="hint">DRAG / SWIPE FREELY · PINCH TO ZOOM · SCROLL TO ZOOM</div>
+</div>
+
+<div id="controls">
+  <button class="btn active" id="btn-play" onclick="togglePlay()">⏸ PAUSE</button>
+  <button class="btn" onclick="resetSim()">↺ RESET</button>
+  <button class="btn accent" onclick="autoSpin()">↻ AUTO SPIN</button>
+  <button class="btn violet" id="btn-cloud" onclick="toggleElectronCloud()">☁ ELECTRON CLOUD</button>
+  <button class="btn green"  id="btn-bonds" onclick="toggleBondLines()">⟶ BOND AXES</button>
+  <button class="btn" id="btn-labels" onclick="toggleLabels()">⊞ LABELS</button>
+  <div id="speed-wrap">
+    SPEED
+    <input type="range" id="speed-slider" min="0.2" max="3" step="0.1" value="1" oninput="setSpeed(this.value)">
+    <span id="speed-val">1.0×</span>
+  </div>
+</div>
+
+<div id="int-selector">
+  <span class="int-label">INTERMEDIATE →</span>
+  <button class="int-btn sel" id="int-carbocation" onclick="setIntermediate('carbocation')">CARBOCATION</button>
+  <button class="int-btn"     id="int-carbanion"   onclick="setIntermediate('carbanion')">CARBANION</button>
+  <button class="int-btn"     id="int-radical"     onclick="setIntermediate('radical')">FREE RADICAL</button>
+</div>
+
+<div id="live-stats">
+  <div class="live-item"><span class="lval gold"   id="stat-name">Carbocation</span><span class="llabel">Intermediate</span></div>
+  <div class="live-item"><span class="lval blue"   id="stat-geometry">Trigonal Planar</span><span class="llabel">Geometry</span></div>
+  <div class="live-item"><span class="lval red"    id="stat-charge">+1</span><span class="llabel">Charge</span></div>
+  <div class="live-item"><span class="lval green"  id="stat-electrons">6</span><span class="llabel">Valence e⁻</span></div>
+  <div class="live-item"><span class="lval violet" id="stat-hybrid">sp²</span><span class="llabel">Hybridization</span></div>
+  <div class="live-item"><span class="lval orange" id="stat-example">R₃C⁺</span><span class="llabel">Formula</span></div>
+</div>
+
+<div id="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:#ff4400"></div>Carbon (Central)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#cccccc;opacity:0.9"></div>Hydrogen / Group</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#cc44ff;opacity:0.7"></div>Empty / Filled p Orbital</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#ffd700;opacity:0.7"></div>Bond Axis</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#44ffaa;opacity:0.7"></div>Electron Cloud</div>
+</div>
+
+<div id="info-grid">
+  <div class="panel">
+    <h3>Intermediate Data</h3>
+    <div class="stat-row"><span class="label">Type</span><span class="val" id="info-type">Carbocation</span></div>
+    <div class="stat-row"><span class="label">Geometry</span><span class="val" id="info-geo">Trigonal Planar</span></div>
+    <div class="stat-row"><span class="label">Hybridization</span><span class="val" id="info-hyb">sp²</span></div>
+    <div class="stat-row"><span class="label">Charge</span><span class="val" id="info-charge">+1</span></div>
+    <div class="stat-row"><span class="label">Valence e⁻</span><span class="val" id="info-elec">6</span></div>
+    <div class="stat-row"><span class="label">Empty Orbital</span><span class="val" id="info-orbital">1 empty p orbital</span></div>
+    <div class="stat-row"><span class="label">Stability Order</span><span class="val" id="info-stab">3° > 2° > 1° > CH₃⁺</span></div>
+  </div>
+  <div class="panel">
+    <h3>Key Concept</h3>
+    <p id="info-concept">Carbocation has <strong>only 6 valence electrons</strong> — it is an <strong>electron-deficient</strong> species. The central carbon is sp² hybridized with a <strong>trigonal planar</strong> geometry and one <strong>empty p orbital</strong> perpendicular to the plane. It acts as a <strong>Lewis acid / electrophile</strong>. Drag the model to see the empty orbital from any angle.</p>
+  </div>
+</div>
+
+<div id="theory">
+  <h2>⚗ Complete Theory & Explanation</h2>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">What are Reactive Intermediates?<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <p>Reactive intermediates are <strong>short-lived, highly unstable species</strong> formed during the course of an organic reaction. They are not isolated under normal conditions but exist <strong>transiently</strong> between reactants and products. The three main types are:</p>
+      <ul>
+        <li><strong>Carbocation (R₃C⁺)</strong> — carbon with only 6 electrons, positive charge</li>
+        <li><strong>Carbanion (R₃C⁻)</strong> — carbon with 8 electrons + lone pair, negative charge</li>
+        <li><strong>Free Radical (R₃C·)</strong> — carbon with 7 electrons, unpaired electron, neutral</li>
+      </ul>
+      <div class="formula-box">Reactants → [Intermediate] → Products</div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Carbocation — Electrophilic Carbon<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>Structure:</strong> Carbon bonded to 3 groups, sp² hybridized</li>
+        <li><strong>Geometry:</strong> Trigonal Planar · Bond angle: 120°</li>
+        <li><strong>Charge:</strong> +1 · Only 6 valence electrons</li>
+        <li><strong>Empty orbital:</strong> One empty p orbital perpendicular to the plane</li>
+        <li><strong>Nature:</strong> Electrophile (electron seeker), Lewis acid</li>
+        <li><strong>Stability:</strong> Tertiary (3°) > Secondary (2°) > Primary (1°) > Methyl</li>
+        <li><strong>Stabilization:</strong> Hyperconjugation, +I effect, resonance (allylic/benzylic)</li>
+        <li><strong>Reactions:</strong> SN1, E1, electrophilic addition (alkenes)</li>
+        <li><em>Example:</em> (CH₃)₃C⁺ — tert-butyl carbocation (very stable)</li>
+      </ul>
+      <div class="formula-box">R₃C⁺ : 6e⁻ · sp² · trigonal planar</div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Carbanion — Nucleophilic Carbon<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>Structure:</strong> Carbon bonded to 3 groups + 1 lone pair, sp³ hybridized</li>
+        <li><strong>Geometry:</strong> Pyramidal (like NH₃) · Bond angle: ~107°</li>
+        <li><strong>Charge:</strong> −1 · Has 8 valence electrons</li>
+        <li><strong>Lone pair:</strong> One lone pair in sp³ orbital</li>
+        <li><strong>Nature:</strong> Nucleophile (electron donor), Lewis base</li>
+        <li><strong>Stability:</strong> Methyl > Primary > Secondary > Tertiary (opposite of carbocation)</li>
+        <li><strong>Stabilization:</strong> −I effect, resonance (allylic), electron-withdrawing groups</li>
+        <li><strong>Reactions:</strong> SN2, Grignard reactions, organometallic chemistry</li>
+        <li><em>Example:</em> CH₃⁻ — methyl carbanion (most stable carbanion)</li>
+      </ul>
+      <div class="formula-box">R₃C⁻ : 8e⁻ · sp³ · pyramidal</div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Free Radical — Neutral Unpaired Electron<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>Structure:</strong> Carbon bonded to 3 groups + 1 unpaired electron</li>
+        <li><strong>Geometry:</strong> Planar (sp²) or slightly pyramidal — debated</li>
+        <li><strong>Charge:</strong> 0 (neutral) · Has 7 valence electrons</li>
+        <li><strong>Unpaired e⁻:</strong> One unpaired electron in p or sp³ orbital</li>
+        <li><strong>Nature:</strong> Neither electrophile nor nucleophile — highly reactive</li>
+        <li><strong>Stability:</strong> Tertiary (3°) > Secondary (2°) > Primary (1°) > Methyl</li>
+        <li><strong>Stabilization:</strong> Hyperconjugation, resonance (allylic/benzylic)</li>
+        <li><strong>Reactions:</strong> Halogenation (CH₄ + Cl₂ → light), polymerization, combustion</li>
+        <li><em>Example:</em> CH₃· — methyl radical</li>
+      </ul>
+      <div class="formula-box">R₃C· : 7e⁻ · sp² · planar</div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Comparison Table — All Three Intermediates<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>Carbocation R₃C⁺:</strong> 6e⁻, sp², planar, +1 charge, electrophile, 3°>2°>1° stability</li>
+        <li><strong>Carbanion R₃C⁻:</strong> 8e⁻, sp³, pyramidal, −1 charge, nucleophile, 1°>2°>3° stability</li>
+        <li><strong>Free Radical R₃C·:</strong> 7e⁻, sp²/sp³, planar, neutral, 3°>2°>1° stability</li>
+      </ul>
+      <div class="formula-box">Stability: Carbocation & Radical → 3°>2°>1° | Carbanion → 1°>2°>3°</div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Reactions Involving Reactive Intermediates<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <ul>
+        <li><strong>SN1 reaction</strong> — goes through <em>carbocation</em> intermediate (rate = k[substrate])</li>
+        <li><strong>SN2 reaction</strong> — goes through <em>carbanion-like</em> transition state (rate = k[substrate][nucleophile])</li>
+        <li><strong>Free Radical Halogenation</strong> — CH₄ + Cl₂ → <em>free radical chain mechanism</em> (initiation → propagation → termination)</li>
+        <li><strong>E1 Elimination</strong> — involves <em>carbocation</em> intermediate</li>
+        <li><strong>Addition to Alkenes</strong> — Markovnikov's rule: <em>carbocation</em> forms at more substituted carbon</li>
+        <li><strong>Grignard Reagents</strong> — contain <em>carbanion</em> character (C−Mg bond)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-head" onclick="toggleAcc(this)">Hyperconjugation & Resonance Stabilization<span class="arrow">▾</span></div>
+    <div class="acc-body">
+      <p><strong>Hyperconjugation</strong> stabilizes carbocations and radicals. Adjacent C−H sigma bonds overlap with the empty/half-filled p orbital, delocalizing electron density.</p>
+      <ul>
+        <li>More C−H bonds adjacent → more hyperconjugation → more stable</li>
+        <li>Tert-butyl cation: 9 C−H bonds for hyperconjugation → very stable</li>
+        <li><strong>Allylic/Benzylic</strong> intermediates are exceptionally stable due to resonance with π system</li>
+      </ul>
+      <div class="formula-box">CH₂=CH−CH₂⁺ ↔ ⁺CH₂−CH=CH₂ (Allylic resonance)</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>3D-CHEMISTRY LAB</span> · Reactive Intermediates — 3D Interactive · Class XI/XII · © 2025 · All Rights Reserved
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ── SECURITY ── */
+(function(){
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    if (e.key === 'F12') { e.preventDefault(); return false; }
+    if (e.ctrlKey || e.metaKey) {
+      if (['u','s','a','c','p','j','i'].includes(k)) { e.preventDefault(); return false; }
+    }
+    if (/^f\d+$/.test(k)) { e.preventDefault(); return false; }
+  }, true);
+  document.addEventListener('selectstart', e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+  ['copy','cut','paste'].forEach(evt => document.addEventListener(evt, e => e.preventDefault()));
+  (function devToolsDetect(){
+    const threshold = 160;
+    function check(){
+      if(window.outerWidth-window.innerWidth>threshold||window.outerHeight-window.innerHeight>threshold){
+        document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#020408;color:#ffd700;font-family:monospace;font-size:1.2rem;letter-spacing:3px;">⛔ ACCESS DENIED</div>';
+      }
+    }
+    setInterval(check,1000);
+    window.addEventListener('resize',check);
+  })();
+  setInterval(function(){(function(){})['constructor']('debugger')();},3000);
+  window.addEventListener('beforeprint',e=>e.preventDefault());
+  const wm=document.createElement('div');
+  wm.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;opacity:0.018;background:repeating-linear-gradient(45deg,transparent,transparent 80px,rgba(255,215,0,0.5) 80px,rgba(255,215,0,0.5) 82px);';
+  document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(wm));
+})();
+
+/* ── INTERMEDIATE DATA ── */
+const INTERMEDIATES = {
+  carbocation: {
+    name: 'Carbocation',
+    geometry: 'Trigonal Planar',
+    charge: '+1',
+    electrons: '6',
+    hybrid: 'sp²',
+    example: 'R₃C⁺',
+    exampleFull: 'R₃C⁺ (Carbocation)',
+    orbital: '1 empty p orbital',
+    stability: '3° > 2° > 1° > CH₃⁺',
+    concept: 'Carbocation has <strong>only 6 valence electrons</strong> — it is an <strong>electron-deficient</strong> species. The central carbon is sp² hybridized with a <strong>trigonal planar</strong> geometry and one <strong>empty p orbital</strong> perpendicular to the plane. It acts as a <strong>Lewis acid / electrophile</strong>. Drag to see the empty orbital from any angle.',
+    centralColor: 0xff5500,
+    bondAtomColor: 0xaaaaaa,
+    specialColor: 0xff4455,    // empty orbital color
+    bondCount: 3,
+    // trigonal planar directions (120° apart in XZ plane)
+    directions: [
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(-0.5, 0, 0.866),
+      new THREE.Vector3(-0.5, 0, -0.866)
+    ],
+    hasEmptyOrbital: true,
+    hasLonePair: false,
+    hasRadical: false,
+  },
+  carbanion: {
+    name: 'Carbanion',
+    geometry: 'Pyramidal',
+    charge: '−1',
+    electrons: '8',
+    hybrid: 'sp³',
+    example: 'R₃C⁻',
+    exampleFull: 'R₃C⁻ (Carbanion)',
+    orbital: '1 lone pair (sp³)',
+    stability: '1° > 2° > 3°',
+    concept: 'Carbanion has <strong>8 valence electrons</strong> including a <strong>lone pair</strong> — it is an <strong>electron-rich</strong> species. The central carbon is sp³ hybridized with a <strong>pyramidal</strong> geometry (similar to NH₃). It acts as a <strong>Lewis base / nucleophile</strong>. The lone pair is shown above the carbon center.',
+    centralColor: 0x0088ff,
+    bondAtomColor: 0xaaaaaa,
+    specialColor: 0x44ffaa,   // lone pair color
+    bondCount: 3,
+    // pyramidal: bonds go down, lone pair goes up
+    directions: [
+      new THREE.Vector3(0.943, -0.333, 0),
+      new THREE.Vector3(-0.471, -0.333, 0.816),
+      new THREE.Vector3(-0.471, -0.333, -0.816)
+    ],
+    hasEmptyOrbital: false,
+    hasLonePair: true,
+    hasRadical: false,
+  },
+  radical: {
+    name: 'Free Radical',
+    geometry: 'Planar (sp²)',
+    charge: '0 (Neutral)',
+    electrons: '7',
+    hybrid: 'sp² / sp³',
+    example: 'R₃C·',
+    exampleFull: 'R₃C· (Free Radical)',
+    orbital: '1 unpaired electron',
+    stability: '3° > 2° > 1° > CH₃·',
+    concept: 'Free Radical has <strong>7 valence electrons</strong> with <strong>one unpaired electron</strong>. It is a neutral species, generally <strong>sp² hybridized</strong> with a near-planar geometry. The unpaired electron occupies a p orbital. It is neither an electrophile nor nucleophile — it is highly reactive and involved in <strong>chain reactions</strong>.',
+    centralColor: 0xffaa00,
+    bondAtomColor: 0xaaaaaa,
+    specialColor: 0xcc44ff,   // radical electron color
+    bondCount: 3,
+    // trigonal planar like carbocation
+    directions: [
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(-0.5, 0, 0.866),
+      new THREE.Vector3(-0.5, 0, -0.866)
+    ],
+    hasEmptyOrbital: false,
+    hasLonePair: false,
+    hasRadical: true,
+  }
+};
+
+/* ── THREE.JS SETUP ── */
+const wrap = document.getElementById('three-wrap');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+renderer.setClearColor(0x020408, 1);
+wrap.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, wrap.clientWidth / wrap.clientHeight, 0.1, 200);
+let cameraZ = 20, targetCameraZ = 20;
+camera.position.set(0, 0, cameraZ);
+
+// lights
+const ambLight = new THREE.AmbientLight(0x334466, 0.8);
+scene.add(ambLight);
+const ptCenter = new THREE.PointLight(0xffffff, 3.5, 40);
+scene.add(ptCenter);
+const ptFill = new THREE.PointLight(0x0044ff, 1.2, 60);
+ptFill.position.set(-10, 10, 10);
+scene.add(ptFill);
+const ptRim = new THREE.PointLight(0xff4400, 0.8, 40);
+ptRim.position.set(10, -8, -10);
+scene.add(ptRim);
+
+// scene group for rotation
+const sceneGroup = new THREE.Group();
+scene.add(sceneGroup);
+
+window.addEventListener('resize', () => {
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+});
+
+/* ── STATE ── */
+let currentInt = 'carbocation';
+let playing = true, autoSpinOn = false, showCloud = true, showBonds = true, showLabels = true;
+let simSpeed = 1.0;
+let isDragging = false, lastPointer = { x: 0, y: 0 };
+let velX = 0, velY = 0;
+let pinchDist0 = 0;
+const SENSITIVITY = 0.008;
+const INERTIA_DECAY = 0.92;
+let modelQuat = new THREE.Quaternion();
+
+/* ── MESH ARRAYS ── */
+let centralAtomMesh = null;
+let bondAtomMeshes = [], bondLineMeshes = [], cloudMeshes = [];
+let specialMesh = null; // empty orbital / lone pair / radical
+let labelSprites = [];
+
+/* ── BUILDERS ── */
+function buildCentralAtom(color) {
+  if (centralAtomMesh) sceneGroup.remove(centralAtomMesh);
+  const geo = new THREE.SphereGeometry(1.05, 32, 32);
+  const mat = new THREE.MeshPhongMaterial({
+    color, emissive: color, emissiveIntensity: 0.3,
+    shininess: 90, transparent: true, opacity: 0.95
+  });
+  centralAtomMesh = new THREE.Mesh(geo, mat);
+  sceneGroup.add(centralAtomMesh);
+}
+
+function buildBondAtom(dir, color) {
+  const geo = new THREE.SphereGeometry(0.55, 24, 24);
+  const mat = new THREE.MeshPhongMaterial({
+    color, emissive: color, emissiveIntensity: 0.15,
+    shininess: 70, transparent: true, opacity: 0.88
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  const pos = dir.clone().normalize().multiplyScalar(4.2);
+  mesh.position.copy(pos);
+  sceneGroup.add(mesh);
+  bondAtomMeshes.push(mesh);
+}
+
+function buildBondLine(dir) {
+  const points = [new THREE.Vector3(0, 0, 0), dir.clone().normalize().multiplyScalar(3.6)];
+  const geo = new THREE.BufferGeometry().setFromPoints(points);
+  const mat = new THREE.LineBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.35 });
+  const line = new THREE.Line(geo, mat);
+  line.visible = showBonds;
+  sceneGroup.add(line);
+  bondLineMeshes.push(line);
+}
+
+function buildCloud(dir) {
+  const geo = new THREE.SphereGeometry(1.6, 16, 16);
+  const mat = new THREE.MeshPhongMaterial({
+    color: 0x44ffaa, transparent: true, opacity: 0.07, wireframe: false, side: THREE.DoubleSide
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  const pos = dir.clone().normalize().multiplyScalar(4.2);
+  mesh.position.copy(pos);
+  mesh.visible = showCloud;
+  sceneGroup.add(mesh);
+  cloudMeshes.push(mesh);
+}
+
+function buildEmptyOrbital(color) {
+  // torus-like ring above carbon = empty p orbital
+  const geo = new THREE.TorusGeometry(1.4, 0.18, 16, 60);
+  const mat = new THREE.MeshPhongMaterial({
+    color, emissive: color, emissiveIntensity: 0.4,
+    transparent: true, opacity: 0.38, side: THREE.DoubleSide
+  });
+  specialMesh = new THREE.Mesh(geo, mat);
+  specialMesh.rotation.x = Math.PI / 2; // lay flat in XZ = looks like p orbital ring
+  specialMesh.position.set(0, 0.1, 0);
+  // add ghosted p lobe above
+  const lobeGeoUp = new THREE.SphereGeometry(0.7, 20, 20);
+  const lobeMat = new THREE.MeshPhongMaterial({
+    color, emissive: color, emissiveIntensity: 0.3,
+    transparent: true, opacity: 0.22, side: THREE.DoubleSide
+  });
+  const lobeUp = new THREE.Mesh(lobeGeoUp, lobeMat.clone());
+  lobeUp.position.set(0, 2.1, 0);
+  const lobeDn = new THREE.Mesh(lobeGeoUp, lobeMat.clone());
+  lobeDn.position.set(0, -2.1, 0);
+  sceneGroup.add(specialMesh);
+  sceneGroup.add(lobeUp);
+  sceneGroup.add(lobeDn);
+  // store all for removal
+  specialMesh._extras = [lobeUp, lobeDn];
+}
+
+function buildLonePair(color) {
+  // Lone pair — glowing sphere above pyramidal carbon
+  const geo = new THREE.SphereGeometry(0.55, 24, 24);
+  const mat = new THREE.MeshPhongMaterial({
+    color, emissive: color, emissiveIntensity: 0.7,
+    transparent: true, opacity: 0.75
+  });
+  specialMesh = new THREE.Mesh(geo, mat);
+  specialMesh.position.set(0, 2.5, 0);
+  // halo ring around lone pair
+  const hGeo = new THREE.TorusGeometry(0.75, 0.06, 12, 40);
+  const hMat = new THREE.MeshPhongMaterial({ color, transparent: true, opacity: 0.4 });
+  const halo = new THREE.Mesh(hGeo, hMat);
+  halo.position.copy(specialMesh.position);
+  sceneGroup.add(specialMesh);
+  sceneGroup.add(halo);
+  specialMesh._extras = [halo];
+  // Add a second smaller sphere for lone pair representation
+  const geo2 = new THREE.SphereGeometry(0.38, 20, 20);
+  const mat2 = new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 0.6, transparent: true, opacity: 0.65 });
+  const dot2 = new THREE.Mesh(geo2, mat2);
+  dot2.position.set(0.5, 2.5, 0);
+  const dot3 = dot2.clone();
+  dot3.position.set(-0.5, 2.5, 0);
+  sceneGroup.add(dot2); sceneGroup.add(dot3);
+  specialMesh._extras.push(dot2, dot3);
+}
+
+function buildRadicalDot(color) {
+  // Radical — single electron dot orbiting in p orbital
+  const geo = new THREE.SphereGeometry(0.32, 20, 20);
+  const mat = new THREE.MeshPhongMaterial({
+    color, emissive: color, emissiveIntensity: 0.9,
+    transparent: true, opacity: 0.9
+  });
+  specialMesh = new THREE.Mesh(geo, mat);
+  specialMesh.position.set(0, 2.2, 0);
+  // p orbital ghost lobes
+  const lobeGeo = new THREE.SphereGeometry(0.65, 20, 20);
+  const lobeMat = new THREE.MeshPhongMaterial({
+    color, emissive: color, emissiveIntensity: 0.25,
+    transparent: true, opacity: 0.20, side: THREE.DoubleSide
+  });
+  const lobeUp = new THREE.Mesh(lobeGeo, lobeMat.clone());
+  lobeUp.position.set(0, 2.0, 0);
+  const lobeDn = new THREE.Mesh(lobeGeo, lobeMat.clone());
+  lobeDn.position.set(0, -2.0, 0);
+  // orbit ring
+  const rGeo = new THREE.TorusGeometry(1.0, 0.05, 10, 50);
+  const rMat = new THREE.MeshPhongMaterial({ color, transparent: true, opacity: 0.25 });
+  const ring = new THREE.Mesh(rGeo, rMat);
+  ring.rotation.x = Math.PI / 2;
+  sceneGroup.add(specialMesh);
+  sceneGroup.add(lobeUp);
+  sceneGroup.add(lobeDn);
+  sceneGroup.add(ring);
+  specialMesh._extras = [lobeUp, lobeDn, ring];
+}
+
+function makeLabel(text, color) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 256, 64);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.roundRect(4, 4, 248, 56, 10);
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.font = 'bold 24px Orbitron,monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 128, 32);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(2.4, 0.6, 1);
+  return sprite;
+}
+
+/* ── CLEAR ── */
+function clearModel() {
+  bondAtomMeshes.forEach(m => sceneGroup.remove(m));
+  bondLineMeshes.forEach(m => sceneGroup.remove(m));
+  cloudMeshes.forEach(m => sceneGroup.remove(m));
+  labelSprites.forEach(m => sceneGroup.remove(m));
+  if (specialMesh) {
+    sceneGroup.remove(specialMesh);
+    if (specialMesh._extras) specialMesh._extras.forEach(m => sceneGroup.remove(m));
+  }
+  bondAtomMeshes = []; bondLineMeshes = []; cloudMeshes = [];
+  labelSprites = []; specialMesh = null;
+}
+
+/* ── BUILD ── */
+const BOND_LABELS = {
+  carbocation: ['H / R', 'H / R', 'H / R'],
+  carbanion:   ['H / R', 'H / R', 'H / R'],
+  radical:     ['H / R', 'H / R', 'H / R']
+};
+
+function buildIntermediate(key) {
+  clearModel();
+  const d = INTERMEDIATES[key];
+  buildCentralAtom(d.centralColor);
+
+  d.directions.forEach((dir, i) => {
+    buildBondAtom(dir, d.bondAtomColor);
+    buildBondLine(dir);
+    buildCloud(dir);
+    const lbl = makeLabel(BOND_LABELS[key][i], '#aaaaaa');
+    lbl.position.copy(dir.clone().normalize().multiplyScalar(5.6));
+    lbl.visible = showLabels;
+    sceneGroup.add(lbl);
+    labelSprites.push(lbl);
+  });
+
+  if (d.hasEmptyOrbital) buildEmptyOrbital(d.specialColor);
+  if (d.hasLonePair)     buildLonePair(d.specialColor);
+  if (d.hasRadical)      buildRadicalDot(d.specialColor);
+
+  // Central C label
+  const cLbl = makeLabel('C', '#' + d.centralColor.toString(16).padStart(6, '0'));
+  cLbl.position.set(0, 1.8, 0);
+  cLbl.visible = showLabels;
+  sceneGroup.add(cLbl);
+  labelSprites.push(cLbl);
+}
+
+function updateInfoPanel(key) {
+  const d = INTERMEDIATES[key];
+  document.getElementById('stat-name').textContent = d.name;
+  document.getElementById('stat-geometry').textContent = d.geometry;
+  document.getElementById('stat-charge').textContent = d.charge;
+  document.getElementById('stat-electrons').textContent = d.electrons;
+  document.getElementById('stat-hybrid').textContent = d.hybrid;
+  document.getElementById('stat-example').textContent = d.example;
+  document.getElementById('info-type').textContent = d.name;
+  document.getElementById('info-geo').textContent = d.geometry;
+  document.getElementById('info-hyb').textContent = d.hybrid;
+  document.getElementById('info-charge').textContent = d.charge;
+  document.getElementById('info-elec').textContent = d.electrons + ' valence electrons';
+  document.getElementById('info-orbital').textContent = d.orbital;
+  document.getElementById('info-stab').textContent = d.stability;
+  document.getElementById('info-concept').innerHTML = d.concept;
+  document.getElementById('current-type').textContent = d.name.toUpperCase() + ' — ' + d.hybrid;
+}
+
+/* ── INITIAL ── */
+buildIntermediate(currentInt);
+updateInfoPanel(currentInt);
+
+/* ── CONTROLS ── */
+function setIntermediate(key) {
+  if (key === currentInt) return;
+  currentInt = key;
+  document.querySelectorAll('.int-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('int-' + key).classList.add('sel');
+  const lbl = document.getElementById('int-label');
+  lbl.textContent = 'INTERMEDIATE FORMING'; lbl.classList.add('visible');
+  setTimeout(() => {
+    buildIntermediate(key); updateInfoPanel(key);
+    setTimeout(() => lbl.classList.remove('visible'), 900);
+  }, 500);
+}
+
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('btn-play').textContent = playing ? '⏸ PAUSE' : '▶ PLAY';
+  document.getElementById('btn-play').classList.toggle('active', playing);
+}
+
+function autoSpin() {
+  autoSpinOn = !autoSpinOn;
+  if (autoSpinOn) velX = 0.012;
+}
+
+function setSpeed(v) { simSpeed = parseFloat(v); document.getElementById('speed-val').textContent = simSpeed.toFixed(1) + '×'; }
+
+function resetSim() {
+  playing = true; autoSpinOn = false;
+  document.getElementById('btn-play').textContent = '⏸ PAUSE';
+  document.getElementById('btn-play').classList.add('active');
+  modelQuat.set(0, 0, 0, 1);
+  velX = 0; velY = 0;
+  targetCameraZ = 20; cameraZ = 20;
+  camera.position.set(0, 0, 20);
+  buildIntermediate(currentInt);
+}
+
+function toggleElectronCloud() {
+  showCloud = !showCloud;
+  cloudMeshes.forEach(m => m.visible = showCloud);
+  document.getElementById('btn-cloud').classList.toggle('active', showCloud);
+}
+
+function toggleBondLines() {
+  showBonds = !showBonds;
+  bondLineMeshes.forEach(m => m.visible = showBonds);
+  document.getElementById('btn-bonds').classList.toggle('active', showBonds);
+}
+
+function toggleLabels() {
+  showLabels = !showLabels;
+  labelSprites.forEach(m => m.visible = showLabels);
+  document.getElementById('btn-labels').classList.toggle('active', showLabels);
+}
+
+/* ── DRAG HELPERS ── */
+function applyDrag(dx, dy) {
+  const angleX = dy * SENSITIVITY;
+  const angleY = dx * SENSITIVITY;
+  const qX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), angleX);
+  const qY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), angleY);
+  modelQuat.premultiply(qY).premultiply(qX);
+  modelQuat.normalize();
+}
+
+let rotIndicatorTimeout = null;
+function showRotIndicator() {
+  const el = document.getElementById('rot-indicator');
+  el.classList.add('vis');
+  clearTimeout(rotIndicatorTimeout);
+  rotIndicatorTimeout = setTimeout(() => el.classList.remove('vis'), 1200);
+}
+
+/* ── MOUSE ── */
+wrap.addEventListener('mousedown', e => {
+  isDragging = true; lastPointer = { x: e.clientX, y: e.clientY };
+  velX = 0; velY = 0; wrap.classList.add('dragging'); autoSpinOn = false;
+  e.preventDefault();
+});
+window.addEventListener('mouseup', () => { isDragging = false; wrap.classList.remove('dragging'); });
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - lastPointer.x, dy = e.clientY - lastPointer.y;
+  applyDrag(dx, dy);
+  velX = dx * 0.6; velY = dy * 0.6;
+  lastPointer = { x: e.clientX, y: e.clientY };
+});
+wrap.addEventListener('wheel', e => {
+  targetCameraZ = Math.max(8, Math.min(55, targetCameraZ + e.deltaY * 0.04));
+  e.preventDefault();
+}, { passive: false });
+
+/* ── TOUCH ── */
+wrap.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    isDragging = true; lastPointer = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    velX = 0; velY = 0; wrap.classList.add('dragging'); autoSpinOn = false;
+    showRotIndicator();
+  } else if (e.touches.length === 2) {
+    isDragging = false;
+    const t0 = e.touches[0], t1 = e.touches[1];
+    pinchDist0 = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+  }
+  e.preventDefault();
+}, { passive: false });
+
+wrap.addEventListener('touchend', e => {
+  if (e.touches.length === 0) { isDragging = false; wrap.classList.remove('dragging'); }
+  e.preventDefault();
+}, { passive: false });
+
+wrap.addEventListener('touchmove', e => {
+  if (e.touches.length === 1 && isDragging) {
+    const dx = e.touches[0].clientX - lastPointer.x;
+    const dy = e.touches[0].clientY - lastPointer.y;
+    applyDrag(dx, dy);
+    velX = dx * 0.65; velY = dy * 0.65;
+    lastPointer = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  } else if (e.touches.length === 2) {
+    const t0 = e.touches[0], t1 = e.touches[1];
+    const d = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+    targetCameraZ = Math.max(8, Math.min(55, targetCameraZ + (pinchDist0 - d) * 0.07));
+    pinchDist0 = d;
+  }
+  e.preventDefault();
+}, { passive: false });
+
+/* ── ANIMATION ── */
+function animate() {
+  requestAnimationFrame(animate);
+  const t = Date.now() * 0.001;
+
+  cameraZ += (targetCameraZ - cameraZ) * 0.1;
+  camera.position.set(0, 0, cameraZ);
+
+  if (!isDragging && !autoSpinOn) {
+    if (Math.abs(velX) > 0.0005 || Math.abs(velY) > 0.0005) {
+      applyDrag(velX, velY);
+      velX *= INERTIA_DECAY; velY *= INERTIA_DECAY;
+    }
+  }
+
+  if (autoSpinOn && playing) {
+    const qSpin = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0.008 * simSpeed);
+    const qTilt = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 0.002 * simSpeed);
+    modelQuat.premultiply(qSpin).premultiply(qTilt).normalize();
+  }
+
+  sceneGroup.quaternion.copy(modelQuat);
+
+  if (playing) {
+    // central atom pulse
+    if (centralAtomMesh) {
+      const s = 1 + Math.sin(t * 2.8) * 0.045;
+      centralAtomMesh.scale.setScalar(s);
+    }
+
+    // bond atom pulse
+    bondAtomMeshes.forEach((ba, i) => {
+      ba.scale.setScalar(1 + Math.sin(t * 1.6 + i * 1.2) * 0.07);
+    });
+
+    // cloud shimmer
+    cloudMeshes.forEach((cm, i) => {
+      if (cm.material) cm.material.opacity = 0.06 + Math.sin(t * 1.4 + i * 0.9) * 0.022;
+    });
+
+    // bond line pulse
+    bondLineMeshes.forEach((bl, i) => {
+      if (bl.material) bl.material.opacity = 0.22 + Math.sin(t * 2.1 + i * 0.6) * 0.12;
+    });
+
+    // special element animation
+    if (specialMesh) {
+      const d = INTERMEDIATES[currentInt];
+      if (d.hasEmptyOrbital) {
+        // empty orbital ring pulses
+        if (specialMesh.material) specialMesh.material.opacity = 0.28 + Math.sin(t * 2.2) * 0.12;
+        if (specialMesh._extras) {
+          specialMesh._extras.forEach((e, i) => {
+            if (e.material) e.material.opacity = 0.15 + Math.sin(t * 1.8 + i) * 0.08;
+          });
+        }
+      } else if (d.hasLonePair) {
+        // lone pair glows
+        if (specialMesh.material) specialMesh.material.opacity = 0.6 + Math.sin(t * 1.5) * 0.15;
+        specialMesh.scale.setScalar(1 + Math.sin(t * 2) * 0.08);
+      } else if (d.hasRadical) {
+        // radical electron orbits
+        const angle = t * 2.5 * simSpeed;
+        specialMesh.position.set(Math.cos(angle) * 1.0, 2.0, Math.sin(angle) * 1.0);
+        if (specialMesh.material) specialMesh.material.opacity = 0.75 + Math.sin(t * 4) * 0.15;
+      }
+    }
+
+    // nucleus light flicker
+    ptCenter.intensity = 2.8 + Math.sin(t * 3.5) * 0.4;
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+
+/* ── ACCORDION ── */
+function toggleAcc(head) {
+  const body = head.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.acc-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.acc-head').forEach(h => h.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); head.classList.add('open'); }
+}
+</script>
+</body>
+</html>
